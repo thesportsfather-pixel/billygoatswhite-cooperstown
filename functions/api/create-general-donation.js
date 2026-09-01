@@ -1,350 +1,603 @@
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store",
-    },
-  });
-}
-
-async function supabaseGet(env, path) {
-  const key = env.SUPABASE_SERVICE_ROLE_KEY;
-
-  const response = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/${path}`,
+  return new Response(
+    JSON.stringify(data),
     {
+      status,
       headers: {
-        apikey: key,
-        authorization: `Bearer ${key}`,
-        accept: "application/json",
-      },
+        "content-type":
+          "application/json; charset=utf-8",
+
+        "cache-control":
+          "no-store"
+      }
     }
   );
+}
 
-  const text = await response.text();
+
+/* =========================
+   SUPABASE GET
+========================= */
+
+async function supabaseGet(
+  env,
+  path
+) {
+
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/${path}`,
+      {
+        method: "GET",
+
+        headers: {
+          apikey:
+            env.SUPABASE_SERVICE_ROLE_KEY,
+
+          authorization:
+            `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+
+          accept:
+            "application/json"
+        }
+      }
+    );
+
+  const text =
+    await response.text();
 
   if (!response.ok) {
+
     throw new Error(
       `Supabase ${response.status}: ${text}`
     );
+
   }
 
-  return text ? JSON.parse(text) : [];
+  return text
+    ? JSON.parse(text)
+    : [];
+
 }
 
-function stripeFormEncode(params) {
-  const form = new URLSearchParams();
 
-  for (const [key, value] of Object.entries(params)) {
-    if (
-      value === undefined ||
-      value === null ||
-      value === ""
-    ) {
-      continue;
-    }
-
-    form.append(key, String(value));
-  }
-
-  return form;
-}
+/* =========================
+   MAIN HANDLER
+========================= */
 
 export async function onRequestPost({
   request,
-  env,
+  env
 }) {
+
   try {
-    // =====================================================
-    // REQUIRED CONFIG
-    // =====================================================
+
+    /* =========================
+       CONFIG CHECK
+    ========================= */
 
     if (
-      !env.STRIPE_SECRET_KEY ||
       !env.SUPABASE_URL ||
       !env.SUPABASE_SERVICE_ROLE_KEY ||
+      !env.STRIPE_SECRET_KEY ||
       !env.TEAM_KEY
     ) {
+
       return json(
         {
           success: false,
-          error: "Missing server configuration.",
+          error:
+            "Missing server configuration."
         },
         500
       );
+
     }
 
-    // =====================================================
-    // REQUEST BODY
-    // =====================================================
 
-    let body;
+    /* =========================
+       REQUEST BODY
+    ========================= */
 
-    try {
-      body = await request.json();
-    } catch {
-      return json(
-        {
-          success: false,
-          error: "Invalid request body.",
-        },
-        400
-      );
-    }
+    const body =
+      await request.json();
 
-    // Accept:
-    // amount: 25
-    // OR amount: "25"
-    //
-    // Amount is in dollars from frontend.
 
     const amount =
-      Number(body.amount);
-
-    if (
-      !Number.isFinite(amount) ||
-      amount <= 0
-    ) {
-      return json(
-        {
-          success: false,
-          error:
-            "Please enter a valid donation amount.",
-        },
-        400
+      Number(
+        body.amount
       );
-    }
+
 
     const amountCents =
-      Math.round(amount * 100);
+      Math.round(
+        amount * 100
+      );
 
-    if (amountCents < 50) {
+
+    const playerKey =
+      String(
+        body.playerKey ||
+        body.player ||
+        ""
+      )
+        .trim();
+
+
+    const anonymous =
+      body.anonymous === true;
+
+
+    let donorName =
+      String(
+        body.donorName ||
+        ""
+      )
+        .trim()
+        .replace(
+          /\s+/g,
+          " "
+        );
+
+
+    /* =========================
+       VALIDATE AMOUNT
+    ========================= */
+
+    if (
+      !Number.isFinite(
+        amount
+      ) ||
+      !Number.isInteger(
+        amountCents
+      ) ||
+      amountCents < 100
+    ) {
+
       return json(
         {
           success: false,
+
           error:
-            "Donation amount is below Stripe's minimum charge.",
+            "Please enter a donation amount of at least $1."
         },
         400
       );
+
     }
 
-    // =====================================================
-    // PLAYER VALUE IS OPTIONAL
-    // =====================================================
 
-    const requestedPlayerKey = String(
-      body.playerKey ||
-      body.player ||
-      ""
-    )
-      .trim()
-      .toLowerCase();
+    /* =========================
+       VALIDATE DONOR NAME
+    ========================= */
 
-    // =====================================================
-    // FIND TEAM
-    // =====================================================
+    if (
+      anonymous
+    ) {
 
-    const teamRows =
-      await supabaseGet(
-        env,
-        [
-          "teams",
-          "?select=id,team_key,team_name",
-          `&team_key=eq.${encodeURIComponent(
-            env.TEAM_KEY
-          )}`,
-          "&limit=1",
-        ].join("")
-      );
+      donorName =
+        "Anonymous";
 
-    if (!teamRows.length) {
-      return json(
-        {
-          success: false,
-          error: "Team not found.",
-        },
-        404
-      );
-    }
+    } else {
 
-    const team =
-      teamRows[0];
+      if (
+        !donorName
+      ) {
 
-    // =====================================================
-    // OPTIONAL PLAYER LOOKUP
-    // =====================================================
-
-    let player = null;
-
-    if (requestedPlayerKey) {
-      const playerRows =
-        await supabaseGet(
-          env,
-          [
-            "players",
-            "?select=id,player_key,player_name,player_number,slug,name",
-            `&team_id=eq.${encodeURIComponent(
-              team.id
-            )}`,
-            `&player_key=eq.${encodeURIComponent(
-              requestedPlayerKey
-            )}`,
-            "&limit=1",
-          ].join("")
-        );
-
-      if (!playerRows.length) {
         return json(
           {
             success: false,
-            error: "Player not found.",
+
+            error:
+              "Please enter a donor name or choose Remain Anonymous."
+          },
+          400
+        );
+
+      }
+
+
+      if (
+        donorName.length >
+        50
+      ) {
+
+        donorName =
+          donorName.slice(
+            0,
+            50
+          );
+
+      }
+
+    }
+
+
+    /* =========================
+       FIND TEAM
+    ========================= */
+
+    const teams =
+      await supabaseGet(
+        env,
+        `teams?team_key=eq.${encodeURIComponent(
+          env.TEAM_KEY
+        )}&select=id,team_key,team_name&limit=1`
+      );
+
+
+    if (
+      !teams.length
+    ) {
+
+      return json(
+        {
+          success: false,
+
+          error:
+            "Team not found."
+        },
+        404
+      );
+
+    }
+
+
+    const team =
+      teams[0];
+
+
+    /* =========================
+       OPTIONAL PLAYER
+    ========================= */
+
+    let player =
+      null;
+
+
+    if (
+      playerKey
+    ) {
+
+      const players =
+        await supabaseGet(
+          env,
+          `players?team_id=eq.${encodeURIComponent(
+            team.id
+          )}&player_key=eq.${encodeURIComponent(
+            playerKey
+          )}&select=id,player_key,player_name,player_number&limit=1`
+        );
+
+
+      if (
+        !players.length
+      ) {
+
+        return json(
+          {
+            success: false,
+
+            error:
+              "Player not found."
           },
           404
         );
+
       }
 
+
       player =
-        playerRows[0];
+        players[0];
+
     }
 
-    // =====================================================
-    // DONATION TYPE
-    // =====================================================
+
+    /* =========================
+       DONATION TYPE
+    ========================= */
 
     const donationType =
       player
         ? "player_general"
         : "team_general";
 
-    const playerName =
-      player
-        ? (
-            player.player_name ||
-            player.name ||
-            player.player_key
-          )
-        : "";
 
-    const playerNumber =
-      player
-        ? player.player_number
-        : "";
-
-    // =====================================================
-    // CHECKOUT LABEL
-    // =====================================================
-
-    const productName =
-      player
-        ? `Donation for ${playerName}`
-        : `${team.team_name} Team Donation`;
-
-    const requestUrl =
-      new URL(request.url);
+    /* =========================
+       SUCCESS / CANCEL URLS
+    ========================= */
 
     const origin =
-      requestUrl.origin;
+      new URL(
+        request.url
+      ).origin;
 
-    const cancelUrl =
+
+    let successUrl;
+
+    let cancelUrl;
+
+
+    if (
       player
-        ? `${origin}/fundraiser.html?player=${encodeURIComponent(
-            player.player_key
-          )}`
-        : `${origin}/`;
+    ) {
 
-    // =====================================================
-    // STRIPE CHECKOUT SESSION
-    // =====================================================
+      successUrl =
+        `${origin}/fundraiser.html?player=${encodeURIComponent(
+          player.player_key
+        )}&payment=success&session_id={CHECKOUT_SESSION_ID}`;
 
-    const form =
-      stripeFormEncode({
-        mode: "payment",
 
-        "payment_method_types[0]":
-          "card",
+      cancelUrl =
+        `${origin}/fundraiser.html?player=${encodeURIComponent(
+          player.player_key
+        )}&payment=cancelled`;
 
-        "line_items[0][price_data][currency]":
-          "usd",
+    } else {
 
-        "line_items[0][price_data][unit_amount]":
-          amountCents,
+      successUrl =
+        `${origin}/?payment=success&session_id={CHECKOUT_SESSION_ID}`;
 
-        "line_items[0][price_data][product_data][name]":
-          productName,
 
-        "line_items[0][quantity]":
-          1,
+      cancelUrl =
+        `${origin}/?payment=cancelled`;
 
-        success_url:
-          `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+    }
 
-        cancel_url:
-          cancelUrl,
 
-        // ===============================================
-        // CHECKOUT SESSION METADATA
-        // ===============================================
+    /* =========================
+       STRIPE PARAMETERS
+    ========================= */
 
-        "metadata[team_key]":
-          env.TEAM_KEY,
+    const params =
+      new URLSearchParams();
 
-        "metadata[team_id]":
-          team.id,
 
-        "metadata[donation_type]":
-          donationType,
+    params.set(
+      "mode",
+      "payment"
+    );
 
-        "metadata[amount_cents]":
-          amountCents,
 
-        "metadata[player_id]":
-          player?.id,
+    params.set(
+      "success_url",
+      successUrl
+    );
 
-        "metadata[player_key]":
-          player?.player_key,
 
-        "metadata[player_name]":
-          playerName,
+    params.set(
+      "cancel_url",
+      cancelUrl
+    );
 
-        "metadata[player_number]":
-          playerNumber,
 
-        // ===============================================
-        // PAYMENT INTENT METADATA
-        // ===============================================
+    params.set(
+      "line_items[0][price_data][currency]",
+      "usd"
+    );
 
-        "payment_intent_data[metadata][team_key]":
-          env.TEAM_KEY,
 
-        "payment_intent_data[metadata][team_id]":
-          team.id,
+    params.set(
+      "line_items[0][price_data][unit_amount]",
+      String(
+        amountCents
+      )
+    );
 
-        "payment_intent_data[metadata][donation_type]":
-          donationType,
 
-        "payment_intent_data[metadata][amount_cents]":
-          amountCents,
+    params.set(
+      "line_items[0][quantity]",
+      "1"
+    );
 
-        "payment_intent_data[metadata][player_id]":
-          player?.id,
 
-        "payment_intent_data[metadata][player_key]":
-          player?.player_key,
+    /* =========================
+       PRODUCT NAME
+    ========================= */
 
-        "payment_intent_data[metadata][player_name]":
-          playerName,
+    if (
+      player
+    ) {
 
-        "payment_intent_data[metadata][player_number]":
-          playerNumber,
-      });
+      params.set(
+        "line_items[0][price_data][product_data][name]",
+        `Boca Billygoats Cooperstown - ${player.player_name}`
+      );
+
+
+      params.set(
+        "line_items[0][price_data][product_data][description]",
+        `Custom player donation • Donor: ${donorName}`
+      );
+
+    } else {
+
+      params.set(
+        "line_items[0][price_data][product_data][name]",
+        "Boca Billygoats 12U White - Team Donation"
+      );
+
+
+      params.set(
+        "line_items[0][price_data][product_data][description]",
+        `General team donation • Donor: ${donorName}`
+      );
+
+    }
+
+
+    /* =========================
+       SESSION METADATA
+    ========================= */
+
+    params.set(
+      "metadata[team_key]",
+      env.TEAM_KEY
+    );
+
+
+    params.set(
+      "metadata[team_id]",
+      String(
+        team.id
+      )
+    );
+
+
+    params.set(
+      "metadata[donation_type]",
+      donationType
+    );
+
+
+    params.set(
+      "metadata[amount_cents]",
+      String(
+        amountCents
+      )
+    );
+
+
+    params.set(
+      "metadata[donor_name]",
+      donorName
+    );
+
+
+    params.set(
+      "metadata[anonymous]",
+      String(
+        anonymous
+      )
+    );
+
+
+    if (
+      player
+    ) {
+
+      params.set(
+        "metadata[player_id]",
+        String(
+          player.id
+        )
+      );
+
+
+      params.set(
+        "metadata[player_key]",
+        player.player_key
+      );
+
+
+      params.set(
+        "metadata[player_name]",
+        player.player_name
+      );
+
+
+      params.set(
+        "metadata[player_number]",
+        String(
+          player.player_number ??
+          ""
+        )
+      );
+
+    }
+
+
+    /* =========================
+       PAYMENT INTENT METADATA
+    ========================= */
+
+    params.set(
+      "payment_intent_data[metadata][team_key]",
+      env.TEAM_KEY
+    );
+
+
+    params.set(
+      "payment_intent_data[metadata][team_id]",
+      String(
+        team.id
+      )
+    );
+
+
+    params.set(
+      "payment_intent_data[metadata][donation_type]",
+      donationType
+    );
+
+
+    params.set(
+      "payment_intent_data[metadata][amount_cents]",
+      String(
+        amountCents
+      )
+    );
+
+
+    params.set(
+      "payment_intent_data[metadata][donor_name]",
+      donorName
+    );
+
+
+    params.set(
+      "payment_intent_data[metadata][anonymous]",
+      String(
+        anonymous
+      )
+    );
+
+
+    if (
+      player
+    ) {
+
+      params.set(
+        "payment_intent_data[metadata][player_id]",
+        String(
+          player.id
+        )
+      );
+
+
+      params.set(
+        "payment_intent_data[metadata][player_key]",
+        player.player_key
+      );
+
+
+      params.set(
+        "payment_intent_data[metadata][player_name]",
+        player.player_name
+      );
+
+
+      params.set(
+        "payment_intent_data[metadata][player_number]",
+        String(
+          player.player_number ??
+          ""
+        )
+      );
+
+    }
+
+
+    /* =========================
+       CREATE STRIPE SESSION
+    ========================= */
 
     const stripeResponse =
       await fetch(
         "https://api.stripe.com/v1/checkout/sessions",
         {
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
             authorization:
@@ -352,113 +605,144 @@ export async function onRequestPost({
 
             "content-type":
               "application/x-www-form-urlencoded",
+
+            accept:
+              "application/json"
           },
 
-          body: form,
+          body:
+            params.toString()
         }
       );
+
 
     const stripeText =
       await stripeResponse.text();
 
-    let stripeData;
+
+    let session;
+
 
     try {
-      stripeData =
-        JSON.parse(stripeText);
-    } catch {
-      stripeData = null;
-    }
 
-    if (
-      !stripeResponse.ok ||
-      !stripeData?.url
-    ) {
-      console.error(
-        "Stripe general donation error:",
-        stripeText
-      );
+      session =
+        JSON.parse(
+          stripeText
+        );
+
+    } catch {
 
       return json(
         {
           success: false,
+
           error:
-            "Unable to create donation checkout.",
-          details:
-            stripeData?.error?.message ||
-            stripeText,
+            `Stripe returned an invalid response: ${stripeText}`
         },
         500
       );
+
     }
 
-    // =====================================================
-    // SUCCESS
-    // =====================================================
 
-    return json({
-      success: true,
+    if (
+      !stripeResponse.ok
+    ) {
 
-      url:
-        stripeData.url,
+      return json(
+        {
+          success: false,
 
-      checkoutUrl:
-        stripeData.url,
+          error:
+            session?.error?.message ||
+            "Unable to create Stripe checkout session."
+        },
+        stripeResponse.status
+      );
 
-      sessionId:
-        stripeData.id,
+    }
 
-      donationType,
 
-      amount:
-        amountCents / 100,
+    if (
+      !session?.url
+    ) {
 
-      amountCents,
+      return json(
+        {
+          success: false,
 
-      team: {
-        id:
-          team.id,
+          error:
+            "Stripe checkout URL was not returned."
+        },
+        500
+      );
 
-        key:
-          team.team_key,
+    }
 
-        name:
-          team.team_name,
-      },
 
-      player:
-        player
-          ? {
-              id:
-                player.id,
+    /* =========================
+       SUCCESS RESPONSE
+    ========================= */
 
-              key:
-                player.player_key,
+    return json(
+      {
+        success: true,
 
-              name:
-                playerName,
+        url:
+          session.url,
 
-              number:
-                playerNumber,
-            }
-          : null,
-    });
-  } catch (error) {
+        sessionId:
+          session.id,
+
+        donationType,
+
+        donorName,
+
+        anonymous,
+
+        amountCents,
+
+        player:
+          player
+            ? {
+                key:
+                  player.player_key,
+
+                name:
+                  player.player_name,
+
+                number:
+                  player.player_number
+              }
+            : null
+      }
+    );
+
+
+  } catch (
+    error
+  ) {
+
     console.error(
-      "General donation error:",
+      "Create general donation error:",
       error
     );
+
 
     return json(
       {
         success: false,
+
         error:
-          "Unable to create donation.",
-        details:
-          error?.message ||
-          String(error),
+          error instanceof Error
+            ? error.message
+            : String(
+                error
+              )
       },
       500
     );
+
   }
+
 }
