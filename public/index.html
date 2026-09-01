@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Boca Billygoats 12U White | Road to Cooperstown</title>
+
+  <meta
+    name="description"
+    content="Support the Boca Billygoats 12U White on their Road to Cooperstown."
+  />
+
+  <style>
+    :root {
+      --navy: #071a36;
+      --navy-2: #0b2447;
+      --blue: #15a9e5;
+      --blue-light: #63d2ff;
+      --white: #ffffff;
+      --off-white: #f5f8fc;
+      --text: #0d1b2a;
+      --muted: #667085;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(
+          circle at top,
+          rgba(21, 169, 229, 0.2),
+          transparent 35%
+        ),
+        linear-gradient(
+          180deg,
+          #06172e 0%,
+          #0a2141 42%,
+          #f5f8fc 42%
+        );
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page-shell {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+    }
+
+    /* HERO */
+
+    .hero {
+      padding: 34px 0 54px;
+      color: white;
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      padding: 42px 32px;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(7, 26, 54, 0.97),
+          rgba(11, 36, 71, 0.96)
+        );
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      width: 460px;
+      height: 460px;
+      border-radius: 50%;
+      right: -200px;
+      top: -250px;
+      background: rgba(21, 169, 229, 0.16);
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      left: -160px;
+      bottom: -160px;
+      background: rgba(99, 210, 255, 0.09);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .logo-wrap {
+      background: white;
+      border-radius: 24px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 170px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+    }
+
+    .logo-wrap img {
+      width: 100%;
+      max-width: 155px;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .hero-copy {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(21, 169, 229, 0.14);
+      border: 1px solid rgba(99, 210, 255, 0.28);
+      color: #8fe2ff;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(38px, 6vw, 68px);
+      line-height: 0.98;
+      letter-spacing: -2px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 span {
+      color: var(--blue-light);
+    }
+
+    .hero-subtitle {
+      margin: 16px 0 0;
+      font-size: clamp(16px, 2.2vw, 21px);
+      line-height: 1.55;
+      color: #dce9f7;
+      max-width: 760px;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .hero-badge {
+      background: white;
+      color: var(--navy);
+      padding: 9px 13px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .hero-badge.blue {
+      background: var(--blue);
+      color: white;
+    }
+
+    /* CONTENT */
+
+    .content {
+      padding: 42px 0 70px;
+    }
+
+    .intro {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 34px;
+    }
+
+    .intro-label {
+      color: var(--blue);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .intro h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(30px, 5vw, 46px);
+      letter-spacing: -1px;
+    }
+
+    .intro p {
+      margin: 12px auto 0;
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--muted);
+    }
+
+    /* PLAYER GRID */
+
+    .players-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .player-card {
+      position: relative;
+      overflow: hidden;
+      background: white;
+      border-radius: 22px;
+      border: 1px solid #e4eaf2;
+      padding: 22px;
+      box-shadow: 0 10px 28px rgba(7, 26, 54, 0.08);
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    .player-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow);
+      border-color: rgba(21, 169, 229, 0.45);
+    }
+
+    .player-card::before {
+      content: "";
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(21, 169, 229, 0.08);
+      right: -45px;
+      top: -55px;
+    }
+
+    .player-top {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .player-logo {
+      flex: 0 0 62px;
+      width: 62px;
+      height: 62px;
+      background: var(--navy);
+      border-radius: 15px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .player-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .player-info {
+      min-width: 0;
+    }
+
+    .player-number {
+      color: var(--blue);
+      font-weight: 900;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .player-name {
+      font-size: 21px;
+      line-height: 1.15;
+      font-weight: 900;
+      color: var(--navy);
+    }
+
+    .player-copy {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    .player-button {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(
+        135deg,
+        var(--navy),
+        var(--navy-2)
+      );
+      color: white;
+      font-weight: 900;
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition:
+        transform 0.15s ease,
+        background 0.15s ease;
+    }
+
+    .player-button:hover {
+      background: var(--blue);
+      transform: translateY(-1px);
+    }
+
+    /* GENERAL DONATION */
+
+    .general-support {
+      margin-top: 36px;
+      border-radius: 24px;
+      background:
+        linear-gradient(
+          135deg,
+          var(--navy),
+          #123666
+        );
+      padding: 30px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 26px;
+      box-shadow: 0 18px 40px rgba(7, 26, 54, 0.18);
+    }
+
+    .general-support h3 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .general-support p {
+      margin: 7px 0 0;
+      color: #dce9f7;
+      line-height: 1.55;
+    }
+
+    .general-button {
+      flex: 0 0 auto;
+      border: 0;
+      background: var(--blue);
+      color: white;
+      font-weight: 900;
+      padding: 15px 22px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      transition:
+        transform 0.15s ease,
+        background 0.15s ease;
+    }
+
+    .general-button:hover {
+      background: #34bdf1;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      padding: 28px 0 40px;
+      text-align: center;
+      color: #7b8797;
+      font-size: 13px;
+    }
+
+    /* MODAL */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 12, 25, 0.78);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(480px, 100%);
+      background: white;
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    .modal h3 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      color: var(--navy);
+    }
+
+    .modal p {
+      margin: 0 0 20px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .modal label {
+      display: block;
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--navy);
+      margin-bottom: 7px;
+    }
+
+    .modal input {
+      width: 100%;
+      border: 1px solid #ccd5e1;
+      border-radius: 11px;
+      padding: 13px 14px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .modal input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(21, 169, 229, 0.12);
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .modal-btn {
+      border: 0;
+      border-radius: 11px;
+      padding: 13px 16px;
+      font-weight: 900;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .modal-btn.cancel {
+      background: #eef2f6;
+      color: var(--navy);
+    }
+
+    .modal-btn.donate {
+      background: var(--blue);
+      color: white;
+    }
+
+    .modal-message {
+      margin-top: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .modal-message.error {
+      color: #b42318;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 900px) {
+      .players-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero-inner {
+        grid-template-columns: 150px 1fr;
+      }
+
+      .logo-wrap {
+        min-height: 140px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        background:
+          radial-gradient(
+            circle at top,
+            rgba(21, 169, 229, 0.2),
+            transparent 30%
+          ),
+          linear-gradient(
+            180deg,
+            #06172e 0%,
+            #0a2141 36%,
+            #f5f8fc 36%
+          );
+      }
+
+      .page-shell {
+        width: min(100% - 20px, 1180px);
+      }
+
+      .hero {
+        padding-top: 18px;
+        padding-bottom: 34px;
+      }
+
+      .hero-card {
+        padding: 26px 20px;
+        border-radius: 22px;
+      }
+
+      .hero-inner {
+        display: block;
+        text-align: center;
+      }
+
+      .logo-wrap {
+        width: 140px;
+        min-height: 130px;
+        margin: 0 auto 20px;
+        border-radius: 20px;
+      }
+
+      .hero h1 {
+        font-size: 39px;
+        letter-spacing: -1px;
+      }
+
+      .hero-subtitle {
+        font-size: 16px;
+      }
+
+      .hero-badges {
+        justify-content: center;
+      }
+
+      .content {
+        padding-top: 28px;
+      }
+
+      .players-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .player-card {
+        padding: 18px;
+      }
+
+      .player-top {
+        margin-bottom: 13px;
+      }
+
+      .player-name {
+        font-size: 20px;
+      }
+
+      .general-support {
+        display: block;
+        text-align: center;
+        padding: 26px 20px;
+      }
+
+      .general-button {
+        width: 100%;
+        margin-top: 18px;
+      }
+
+      .modal-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="hero">
+    <div class="page-shell">
+      <div class="hero-card">
+
+        <div class="hero-inner">
+
+          <div class="logo-wrap">
+            <img
+              src="/logo.png"
+              alt="Boca Billygoats Baseball"
+            />
+          </div>
+
+          <div class="hero-copy">
+
+            <div class="eyebrow">
+              Boca Billygoats 12U White
+            </div>
+
+            <h1>
+              Road to <span>Cooperstown</span>
+            </h1>
+
+            <p class="hero-subtitle">
+              Help our Boca Billygoats 12U White players
+              make their dream trip to Cooperstown.
+              Choose a player below and support their
+              journey.
+            </p>
+
+            <div class="hero-badges">
+              <div class="hero-badge">
+                12U White
+              </div>
+
+              <div class="hero-badge blue">
+                Cooperstown 2027
+              </div>
+
+              <div class="hero-badge">
+                Boca Raton, Florida
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="page-shell">
+
+      <section class="intro">
+        <div class="intro-label">
+          Support Our Players
+        </div>
+
+        <h2>
+          Choose Your Billygoat
+        </h2>
+
+        <p>
+          Select a player to visit their personal
+          Cooperstown fundraiser. Every donation goes
+          toward helping our team make the trip.
+        </p>
+      </section>
+
+      <section
+        class="players-grid"
+        id="playersGrid"
+      ></section>
+
+      <section class="general-support">
+
+        <div>
+          <h3>
+            Support the Entire Team
+          </h3>
+
+          <p>
+            Don't have a specific player in mind?
+            Make a general donation to Boca Billygoats
+            12U White.
+          </p>
+        </div>
+
+        <button
+          class="general-button"
+          type="button"
+          onclick="openGeneralDonation()"
+        >
+          Make a General Donation
+        </button>
+
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    Boca Billygoats 12U White • Road to Cooperstown
+  </footer>
+
+  <!-- GENERAL DONATION MODAL -->
+
+  <div
+    class="modal-backdrop"
+    id="generalDonationModal"
+  >
+    <div class="modal">
+
+      <h3>
+        General Team Donation
+      </h3>
+
+      <p>
+        Enter the amount you'd like to donate to
+        Boca Billygoats 12U White.
+      </p>
+
+      <label for="generalAmount">
+        Donation Amount
+      </label>
+
+      <input
+        id="generalAmount"
+        type="number"
+        min="1"
+        step="1"
+        inputmode="numeric"
+        placeholder="$50"
+      />
+
+      <div class="modal-actions">
+
+        <button
+          class="modal-btn cancel"
+          type="button"
+          onclick="closeGeneralDonation()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="modal-btn donate"
+          id="generalDonateButton"
+          type="button"
+          onclick="submitGeneralDonation()"
+        >
+          Continue to Checkout
+        </button>
+
+      </div>
+
+      <div
+        id="generalDonationMessage"
+        class="modal-message"
+      ></div>
+
+    </div>
+  </div>
+
+  <script>
+
+    const players = [
+      {
+        number: 1,
+        name: "Joshua Masek",
+        key: "joshua-masek"
+      },
+      {
+        number: 2,
+        name: "Sebastian Mesa",
+        key: "sebastian-mesa"
+      },
+      {
+        number: 3,
+        name: "Zachary Harbaugh",
+        key: "zachary-harbaugh"
+      },
+      {
+        number: 10,
+        name: "Wyatt Munley",
+        key: "wyatt-munley"
+      },
+      {
+        number: 12,
+        name: "Lucas Feo",
+        key: "lucas-feo"
+      },
+      {
+        number: 16,
+        name: "Charles Schlacher",
+        key: "charles-schlacher"
+      },
+      {
+        number: 17,
+        name: "Austin Umstattd",
+        key: "austin-umstattd"
+      },
+      {
+        number: 20,
+        name: "Dylan Spellman",
+        key: "dylan-spellman"
+      },
+      {
+        number: 27,
+        name: "Alex Naylor",
+        key: "alex-naylor"
+      },
+      {
+        number: 28,
+        name: "William Marchionne",
+        key: "william-marchionne"
+      },
+      {
+        number: 37,
+        name: "Dominic DeMarco",
+        key: "dominic-demarco"
+      },
+      {
+        number: 99,
+        name: "Thomas Roberts",
+        key: "thomas-roberts"
+      }
+    ];
+
+    const grid =
+      document.getElementById("playersGrid");
+
+    function renderPlayers() {
+
+      grid.innerHTML = players.map(player => `
+        <article class="player-card">
+
+          <div class="player-top">
+
+            <div class="player-logo">
+              <img
+                src="/logo.png"
+                alt=""
+              />
+            </div>
+
+            <div class="player-info">
+
+              <div class="player-number">
+                PLAYER #${player.number}
+              </div>
+
+              <div class="player-name">
+                ${player.name}
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="player-copy">
+            Support ${player.name}'s journey to
+            Cooperstown with the Boca Billygoats
+            12U White.
+          </div>
+
+          <a
+            class="player-button"
+            href="/fundraiser.html?player=${encodeURIComponent(player.key)}"
+          >
+            Support ${player.name.split(" ")[0]}
+          </a>
+
+        </article>
+      `).join("");
+
+    }
+
+    renderPlayers();
+
+    /* GENERAL DONATION */
+
+    function openGeneralDonation() {
+
+      const modal =
+        document.getElementById(
+          "generalDonationModal"
+        );
+
+      modal.classList.add("open");
+
+      setTimeout(() => {
+        document
+          .getElementById("generalAmount")
+          .focus();
+      }, 100);
+
+    }
+
+    function closeGeneralDonation() {
+
+      document
+        .getElementById(
+          "generalDonationModal"
+        )
+        .classList.remove("open");
+
+      document
+        .getElementById(
+          "generalDonationMessage"
+        )
+        .textContent = "";
+
+    }
+
+    async function submitGeneralDonation() {
+
+      const amountInput =
+        document.getElementById(
+          "generalAmount"
+        );
+
+      const button =
+        document.getElementById(
+          "generalDonateButton"
+        );
+
+      const message =
+        document.getElementById(
+          "generalDonationMessage"
+        );
+
+      const amount =
+        Number(amountInput.value);
+
+      message.textContent = "";
+      message.className =
+        "modal-message";
+
+      if (
+        !Number.isFinite(amount) ||
+        amount < 1
+      ) {
+
+        message.textContent =
+          "Please enter a valid donation amount.";
+
+        message.className =
+          "modal-message error";
+
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent =
+        "Loading Checkout...";
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/create-general-donation",
+            {
+              method: "POST",
+              headers: {
+                "content-type":
+                  "application/json"
+              },
+              body: JSON.stringify({
+                amount
+              })
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok ||
+          !data.url
+        ) {
+          throw new Error(
+            data.error ||
+            "Unable to create checkout."
+          );
+        }
+
+        window.location.href =
+          data.url;
+
+      } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+          error.message ||
+          "Unable to start checkout.";
+
+        message.className =
+          "modal-message error";
+
+        button.disabled = false;
+        button.textContent =
+          "Continue to Checkout";
+
+      }
+
+    }
+
+    document
+      .getElementById(
+        "generalDonationModal"
+      )
+      .addEventListener(
+        "click",
+        event => {
+
+          if (
+            event.target.id ===
+            "generalDonationModal"
+          ) {
+            closeGeneralDonation();
+          }
+
+        }
+      );
+
+  </script>
+
+</body>
+</html>
