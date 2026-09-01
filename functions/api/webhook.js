@@ -8,12 +8,22 @@ function json(data, status = 200) {
   });
 }
 
-/* -------------------------------------------------------
-   STRIPE SIGNATURE VERIFICATION
-------------------------------------------------------- */
+// ============================================================
+// HEX / CRYPTO HELPERS
+// ============================================================
 
-function timingSafeEqual(a, b) {
-  if (a.length !== b.length) {
+function bytesToHex(bytes) {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function safeEqual(a, b) {
+  if (
+    typeof a !== "string" ||
+    typeof b !== "string" ||
+    a.length !== b.length
+  ) {
     return false;
   }
 
@@ -28,15 +38,9 @@ function timingSafeEqual(a, b) {
   return result === 0;
 }
 
-function bytesToHex(bytes) {
-  return Array.from(bytes)
-    .map(byte =>
-      byte
-        .toString(16)
-        .padStart(2, "0")
-    )
-    .join("");
-}
+// ============================================================
+// VERIFY STRIPE SIGNATURE
+// ============================================================
 
 async function verifyStripeSignature(
   payload,
@@ -55,22 +59,22 @@ async function verifyStripeSignature(
     signatureHeader.split(",");
 
   const timestampPart =
-    parts.find(part =>
+    parts.find((part) =>
       part.startsWith("t=")
     );
 
   const signatures =
     parts
-      .filter(part =>
+      .filter((part) =>
         part.startsWith("v1=")
       )
-      .map(part =>
+      .map((part) =>
         part.substring(3)
       );
 
   if (
     !timestampPart ||
-    signatures.length === 0
+    !signatures.length
   ) {
     return false;
   }
@@ -78,32 +82,23 @@ async function verifyStripeSignature(
   const timestamp =
     timestampPart.substring(2);
 
-  /*
-    Reject very old webhook requests.
-    Stripe's normal tolerance is about 5 minutes.
-  */
-
+  // Reject very old webhook requests.
   const timestampNumber =
     Number(timestamp);
 
   if (
-    !Number.isFinite(
-      timestampNumber
-    )
+    !Number.isFinite(timestampNumber)
   ) {
     return false;
   }
 
-  const now =
-    Math.floor(
-      Date.now() / 1000
+  const ageSeconds =
+    Math.abs(
+      Math.floor(Date.now() / 1000) -
+      timestampNumber
     );
 
-  if (
-    Math.abs(
-      now - timestampNumber
-    ) > 300
-  ) {
+  if (ageSeconds > 300) {
     return false;
   }
 
@@ -136,7 +131,7 @@ async function verifyStripeSignature(
       )
     );
 
-  const expectedSignature =
+  const expected =
     bytesToHex(
       new Uint8Array(
         signatureBuffer
@@ -144,103 +139,287 @@ async function verifyStripeSignature(
     );
 
   return signatures.some(
-    signature =>
-      timingSafeEqual(
+    (signature) =>
+      safeEqual(
         signature,
-        expectedSignature
+        expected
       )
   );
 }
 
-/* -------------------------------------------------------
-   SUPABASE HELPERS
-------------------------------------------------------- */
+// ============================================================
+// SUPABASE HELPERS
+// ============================================================
 
-async function supabaseRequest(
+function supabaseHeaders(env, extra = {}) {
+  const key =
+    env.SUPABASE_SERVICE_ROLE_KEY;
+
+  return {
+    apikey: key,
+    authorization:
+      `Bearer ${key}`,
+    "content-type":
+      "application/json",
+    ...extra,
+  };
+}
+
+async function supabaseGet(
   env,
-  path,
-  {
-    method = "GET",
-    body,
-    headers = {},
-  } = {}
+  path
 ) {
   const response =
     await fetch(
       `${env.SUPABASE_URL}/rest/v1/${path}`,
       {
-        method,
-
-        headers: {
-          apikey:
-            env.SUPABASE_SERVICE_ROLE_KEY,
-
-          authorization:
-            `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-
-          accept:
-            "application/json",
-
-          "content-type":
-            "application/json",
-
-          ...headers,
-        },
-
-        body:
-          body === undefined
-            ? undefined
-            : JSON.stringify(body),
+        headers:
+          supabaseHeaders(
+            env
+          ),
       }
     );
 
   const text =
     await response.text();
 
-  let data = null;
-
-  if (text) {
-    try {
-      data =
-        JSON.parse(text);
-    } catch {
-      data =
-        text;
-    }
-  }
-
   if (!response.ok) {
     throw new Error(
-      `Supabase ${response.status}: ${text}`
+      `Supabase GET ${response.status}: ${text}`
     );
   }
 
-  return data;
+  return text
+    ? JSON.parse(text)
+    : [];
 }
 
-/* -------------------------------------------------------
-   DONOR INFORMATION
-------------------------------------------------------- */
+async function supabasePatch(
+  env,
+  path,
+  data
+) {
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/${path}`,
+      {
+        method: "PATCH",
+
+        headers:
+          supabaseHeaders(
+            env,
+            {
+              Prefer:
+                "return=representation",
+            }
+          ),
+
+        body:
+          JSON.stringify(data),
+      }
+    );
+
+  const text =
+    await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `Supabase PATCH ${response.status}: ${text}`
+    );
+  }
+
+  return text
+    ? JSON.parse(text)
+    : [];
+}
+
+async function supabaseUpsert(
+  env,
+  table,
+  data,
+  conflictColumn
+) {
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/${table}?on_conflict=${encodeURIComponent(
+        conflictColumn
+      )}`,
+      {
+        method: "POST",
+
+        headers:
+          supabaseHeaders(
+            env,
+            {
+              Prefer:
+                "resolution=merge-duplicates,return=representation",
+            }
+          ),
+
+        body:
+          JSON.stringify(data),
+      }
+    );
+
+  const text =
+    await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `Supabase UPSERT ${response.status}: ${text}`
+    );
+  }
+
+  return text
+    ? JSON.parse(text)
+    : [];
+}
+
+// ============================================================
+// PARSE BALL NUMBERS
+//
+// Stripe metadata looks like:
+//
+// "1,12,47"
+//
+// NOT:
+// "{1,12,47}"
+//
+// This prevents the PostgreSQL malformed-array issue.
+// ============================================================
+
+function parseBalls(value) {
+  if (!value) {
+    return [];
+  }
+
+  return [
+    ...new Set(
+      String(value)
+        .split(",")
+        .map((value) =>
+          Number(
+            value.trim()
+          )
+        )
+        .filter(
+          (value) =>
+            Number.isInteger(value) &&
+            value >= 1 &&
+            value <= 100
+        )
+    ),
+  ].sort(
+    (a, b) => a - b
+  );
+}
+
+// ============================================================
+// DONOR INFO
+// ============================================================
 
 function getDonorName(session) {
-  const customer =
+  const details =
     session.customer_details;
 
-  const name =
-    String(
-      customer?.name ||
-      session.customer_name ||
-      ""
-    ).trim();
+  if (
+    details?.name &&
+    details.name.trim()
+  ) {
+    return details.name.trim();
+  }
 
-  return name || "Anonymous";
+  if (
+    session.customer_email
+  ) {
+    return session.customer_email;
+  }
+
+  return "Anonymous";
 }
 
-/* -------------------------------------------------------
-   BASEBALL PAYMENT
-------------------------------------------------------- */
+function getDonorEmail(session) {
+  return (
+    session.customer_details?.email ||
+    session.customer_email ||
+    null
+  );
+}
 
-async function processBaseballPayment(
+// ============================================================
+// RECORD DONATION
+//
+// The next setup step creates the donations table expected here.
+// ============================================================
+
+async function recordDonation(
+  env,
+  {
+    session,
+    teamKey,
+    teamId,
+    playerId,
+    playerKey,
+    donationType,
+    amountCents,
+    donorName,
+    donorEmail,
+    balls,
+  }
+) {
+  const row = {
+    team_key:
+      teamKey,
+
+    team_id:
+      teamId || null,
+
+    player_id:
+      playerId || null,
+
+    player_key:
+      playerKey || null,
+
+    donation_type:
+      donationType,
+
+    amount_cents:
+      amountCents,
+
+    donor_name:
+      donorName,
+
+    donor_email:
+      donorEmail,
+
+    stripe_session_id:
+      session.id,
+
+    stripe_payment_intent_id:
+      typeof session.payment_intent ===
+      "string"
+        ? session.payment_intent
+        : null,
+
+    balls:
+      balls.length
+        ? balls.join(",")
+        : null,
+  };
+
+  return await supabaseUpsert(
+    env,
+    "donations",
+    row,
+    "stripe_session_id"
+  );
+}
+
+// ============================================================
+// PROCESS BASEBALL PAYMENT
+// ============================================================
+
+async function processBaseballDonation(
   env,
   session
 ) {
@@ -248,277 +427,324 @@ async function processBaseballPayment(
     session.metadata || {};
 
   const teamKey =
-    String(
-      metadata.team_key || ""
-    ).trim();
+    metadata.team_key ||
+    env.TEAM_KEY;
+
+  const playerId =
+    metadata.player_id;
 
   const playerKey =
-    String(
-      metadata.player_key || ""
-    ).trim();
+    metadata.player_key;
 
-  const ballsString =
-    String(
-      metadata.balls || ""
-    ).trim();
+  const balls =
+    parseBalls(
+      metadata.balls
+    );
 
   if (
     !teamKey ||
-    !playerKey ||
-    !ballsString
+    !playerId ||
+    !playerKey
   ) {
     throw new Error(
-      "Missing baseball payment metadata."
+      "Baseball payment is missing required metadata."
     );
   }
-
-  /*
-    Extra protection:
-    only process payments belonging
-    to this Cloudflare project.
-  */
-
-  if (
-    teamKey !==
-    env.TEAM_KEY
-  ) {
-    throw new Error(
-      `Webhook team mismatch. Received "${teamKey}".`
-    );
-  }
-
-  /*
-    Stripe metadata example:
-
-    balls = "1,12,47"
-
-    Convert to ordinary integers.
-    Never send this value directly
-    into a PostgreSQL array field.
-  */
-
-  const balls =
-    [
-      ...new Set(
-        ballsString
-          .split(",")
-          .map(value =>
-            Number(
-              value.trim()
-            )
-          )
-          .filter(
-            number =>
-              Number.isInteger(
-                number
-              ) &&
-              number >= 1 &&
-              number <= 100
-          )
-      ),
-    ].sort(
-      (a, b) => a - b
-    );
 
   if (!balls.length) {
     throw new Error(
-      "No valid baseball numbers found in Stripe metadata."
+      "Baseball payment contains no valid baseball numbers."
+    );
+  }
+
+  // --------------------------------------------------------
+  // Verify team
+  // --------------------------------------------------------
+
+  const teamRows =
+    await supabaseGet(
+      env,
+      [
+        "teams",
+        "?select=id,team_key,team_name",
+        `&team_key=eq.${encodeURIComponent(
+          teamKey
+        )}`,
+        "&limit=1",
+      ].join("")
+    );
+
+  if (!teamRows.length) {
+    throw new Error(
+      "Webhook team not found."
+    );
+  }
+
+  const team =
+    teamRows[0];
+
+  // --------------------------------------------------------
+  // Verify player really belongs to team
+  // --------------------------------------------------------
+
+  const playerRows =
+    await supabaseGet(
+      env,
+      [
+        "players",
+        "?select=id,player_key,player_name,player_number",
+        `&id=eq.${encodeURIComponent(
+          playerId
+        )}`,
+        `&team_id=eq.${encodeURIComponent(
+          team.id
+        )}`,
+        "&limit=1",
+      ].join("")
+    );
+
+  if (!playerRows.length) {
+    throw new Error(
+      "Webhook player not found for this team."
+    );
+  }
+
+  const player =
+    playerRows[0];
+
+  if (
+    player.player_key !==
+    playerKey
+  ) {
+    throw new Error(
+      "Player metadata does not match database."
     );
   }
 
   const donorName =
-    getDonorName(session);
+    getDonorName(
+      session
+    );
 
-  const sessionId =
-    String(
-      session.id || ""
+  const donorEmail =
+    getDonorEmail(
+      session
     );
 
   const soldAt =
-    new Date()
-      .toISOString();
+    new Date().toISOString();
 
-  /*
-    Mark every baseball individually.
+  let expectedTotalCents = 0;
 
-    This prevents PostgreSQL from ever
-    interpreting something like "1"
-    as an array literal.
-  */
+  // --------------------------------------------------------
+  // Process each baseball individually
+  // --------------------------------------------------------
 
-  for (
-    const ballNumber
-    of balls
-  ) {
-    const path =
-      [
-        "baseballs",
-        `?team_key=eq.${encodeURIComponent(
-          teamKey
-        )}`,
-        `&player_key=eq.${encodeURIComponent(
-          playerKey
-        )}`,
-        `&ball_number=eq.${ballNumber}`,
-      ].join("");
-
-    const updatedRows =
-      await supabaseRequest(
+  for (const ballNumber of balls) {
+    const existingRows =
+      await supabaseGet(
         env,
-        path,
-        {
-          method: "PATCH",
-
-          headers: {
-            Prefer:
-              "return=representation",
-          },
-
-          body: {
-            sold: true,
-
-            amount:
-              ballNumber,
-
-            donor_name:
-              donorName,
-
-            stripe_session_id:
-              sessionId,
-
-            sold_at:
-              soldAt,
-          },
-        }
+        [
+          "baseballs",
+          "?select=id,player_id,ball_number,amount_cents,status,stripe_session_id",
+          `&player_id=eq.${encodeURIComponent(
+            player.id
+          )}`,
+          `&ball_number=eq.${ballNumber}`,
+          "&limit=1",
+        ].join("")
       );
 
-    /*
-      Normally all 100 baseball rows
-      are already seeded.
+    if (!existingRows.length) {
+      throw new Error(
+        `Baseball #${ballNumber} was not found.`
+      );
+    }
 
-      If a row somehow does not exist,
-      create it.
-    */
+    const existing =
+      existingRows[0];
+
+    expectedTotalCents +=
+      Number(
+        existing.amount_cents || 0
+      );
+
+    const status =
+      String(
+        existing.status || ""
+      ).toLowerCase();
+
+    // ------------------------------------------------------
+    // Already processed by THIS Stripe session
+    // ------------------------------------------------------
 
     if (
-      !Array.isArray(
-        updatedRows
-      ) ||
-      updatedRows.length === 0
+      status === "sold" &&
+      existing.stripe_session_id ===
+        session.id
     ) {
-      await supabaseRequest(
+      continue;
+    }
+
+    // ------------------------------------------------------
+    // Already sold by ANOTHER checkout
+    // ------------------------------------------------------
+
+    if (status === "sold") {
+      console.error(
+        `PAYMENT CONFLICT: Baseball #${ballNumber} for ${playerKey} is already sold by session ${existing.stripe_session_id}. Incoming session: ${session.id}`
+      );
+
+      // Do not overwrite the first donor.
+      continue;
+    }
+
+    // ------------------------------------------------------
+    // Mark ball SOLD
+    // ------------------------------------------------------
+
+    const updated =
+      await supabasePatch(
         env,
-        "baseballs?on_conflict=team_key,player_key,ball_number",
+        [
+          "baseballs",
+          `?id=eq.${encodeURIComponent(
+            existing.id
+          )}`,
+          "&status=neq.sold",
+        ].join(""),
         {
-          method: "POST",
+          status:
+            "sold",
 
-          headers: {
-            Prefer:
-              "resolution=merge-duplicates,return=representation",
-          },
+          donor_name:
+            donorName,
 
-          body: {
-            team_key:
-              teamKey,
+          donor_email:
+            donorEmail,
 
-            player_key:
-              playerKey,
+          stripe_session_id:
+            session.id,
 
-            ball_number:
-              ballNumber,
+          sold_at:
+            soldAt,
 
-            sold: true,
+          reserved_until:
+            null,
 
-            amount:
-              ballNumber,
-
-            donor_name:
-              donorName,
-
-            stripe_session_id:
-              sessionId,
-
-            sold_at:
-              soldAt,
-          },
+          reservation_id:
+            null,
         }
       );
+
+    if (!updated.length) {
+      // Recheck in case webhook retry / concurrent request.
+      const recheck =
+        await supabaseGet(
+          env,
+          [
+            "baseballs",
+            "?select=status,stripe_session_id",
+            `&id=eq.${encodeURIComponent(
+              existing.id
+            )}`,
+            "&limit=1",
+          ].join("")
+        );
+
+      if (
+        recheck[0]?.status !==
+        "sold"
+      ) {
+        throw new Error(
+          `Unable to mark baseball #${ballNumber} as sold.`
+        );
+      }
     }
   }
 
-  /*
-    Baseball payment total.
+  // --------------------------------------------------------
+  // Verify Stripe amount
+  // --------------------------------------------------------
 
-    We calculate it ourselves rather
-    than trusting browser data.
-  */
-
-  const amount =
-    balls.reduce(
-      (total, number) =>
-        total + number,
-      0
+  const paidCents =
+    Number(
+      session.amount_total || 0
     );
 
-  /*
-    Record the overall transaction.
+  if (
+    expectedTotalCents > 0 &&
+    paidCents !==
+      expectedTotalCents
+  ) {
+    console.error(
+      `Amount mismatch for session ${session.id}. Stripe=${paidCents}, Baseballs=${expectedTotalCents}`
+    );
+  }
 
-    stripe_session_id should be UNIQUE,
-    making duplicate Stripe webhook
-    deliveries harmless.
-  */
+  // --------------------------------------------------------
+  // Record transaction
+  // --------------------------------------------------------
 
-  await supabaseRequest(
-    env,
-    "donations?on_conflict=stripe_session_id",
-    {
-      method: "POST",
+  try {
+    await recordDonation(
+      env,
+      {
+        session,
 
-      headers: {
-        Prefer:
-          "resolution=merge-duplicates,return=representation",
-      },
+        teamKey,
 
-      body: {
-        team_key:
-          teamKey,
+        teamId:
+          team.id,
 
-        player_key:
-          playerKey,
+        playerId:
+          player.id,
 
-        donation_type:
+        playerKey:
+          player.player_key,
+
+        donationType:
           "baseballs",
 
-        amount,
+        amountCents:
+          paidCents,
 
-        donor_name:
-          donorName,
+        donorName,
 
-        stripe_session_id:
-          sessionId,
+        donorEmail,
 
-        stripe_payment_intent_id:
-          session.payment_intent
-            ? String(
-                session.payment_intent
-              )
-            : null,
-      },
-    }
-  );
+        balls,
+      }
+    );
+  } catch (error) {
+    /*
+     * Baseball records already contain the critical
+     * payment/donor data, so do NOT undo a successful
+     * baseball sale if donation logging has a problem.
+     */
+    console.error(
+      "Unable to record baseball donation row:",
+      error
+    );
+  }
 
   return {
-    teamKey,
-    playerKey,
+    type:
+      "baseballs",
+
+    player:
+      player.player_key,
+
     balls,
-    amount,
-    donorName,
+
+    amountCents:
+      paidCents,
   };
 }
 
-/* -------------------------------------------------------
-   GENERAL DONATION
-------------------------------------------------------- */
+// ============================================================
+// PROCESS TEAM / PLAYER GENERAL DONATION
+// ============================================================
 
 async function processGeneralDonation(
   env,
@@ -528,155 +754,167 @@ async function processGeneralDonation(
     session.metadata || {};
 
   const teamKey =
-    String(
-      metadata.team_key || ""
-    ).trim();
+    metadata.team_key ||
+    env.TEAM_KEY;
 
   const donationType =
-    String(
-      metadata.donation_type || ""
-    ).trim();
-
-  if (!teamKey) {
-    throw new Error(
-      "Missing team metadata."
-    );
-  }
+    metadata.donation_type;
 
   if (
-    teamKey !==
-    env.TEAM_KEY
+    donationType !==
+      "team_general" &&
+    donationType !==
+      "player_general"
   ) {
     throw new Error(
-      `Webhook team mismatch. Received "${teamKey}".`
+      "Unknown general donation type."
     );
   }
 
-  const validType =
-    donationType ===
-      "team_general" ||
-    donationType ===
-      "player_general";
+  const teamRows =
+    await supabaseGet(
+      env,
+      [
+        "teams",
+        "?select=id,team_key,team_name",
+        `&team_key=eq.${encodeURIComponent(
+          teamKey
+        )}`,
+        "&limit=1",
+      ].join("")
+    );
 
-  if (!validType) {
+  if (!teamRows.length) {
     throw new Error(
-      `Invalid donation type: ${donationType}`
+      "Donation team not found."
     );
   }
 
-  const playerKey =
+  const team =
+    teamRows[0];
+
+  let player =
+    null;
+
+  // --------------------------------------------------------
+  // Player-specific donation
+  // --------------------------------------------------------
+
+  if (
     donationType ===
     "player_general"
-      ? String(
-          metadata.player_key ||
-          ""
-        ).trim()
-      : null;
-
-  if (
-    donationType ===
-      "player_general" &&
-    !playerKey
   ) {
-    throw new Error(
-      "Player donation is missing player_key."
-    );
-  }
+    const playerId =
+      metadata.player_id;
 
-  /*
-    Use Stripe's actual amount paid.
+    const playerKey =
+      metadata.player_key;
 
-    amount_total is stored in cents.
-  */
+    if (
+      !playerId ||
+      !playerKey
+    ) {
+      throw new Error(
+        "Player donation is missing player metadata."
+      );
+    }
 
-  const stripeAmount =
-    Number(
-      session.amount_total
-    );
+    const playerRows =
+      await supabaseGet(
+        env,
+        [
+          "players",
+          "?select=id,player_key,player_name,player_number",
+          `&id=eq.${encodeURIComponent(
+            playerId
+          )}`,
+          `&team_id=eq.${encodeURIComponent(
+            team.id
+          )}`,
+          "&limit=1",
+        ].join("")
+      );
 
-  const amount =
-    Number.isFinite(
-      stripeAmount
-    )
-      ? stripeAmount / 100
-      : Number(
-          metadata.amount
-        );
+    if (!playerRows.length) {
+      throw new Error(
+        "Player donation player not found."
+      );
+    }
 
-  if (
-    !Number.isFinite(amount) ||
-    amount <= 0
-  ) {
-    throw new Error(
-      "Invalid general donation amount."
-    );
+    player =
+      playerRows[0];
   }
 
   const donorName =
-    getDonorName(session);
-
-  const sessionId =
-    String(
-      session.id || ""
+    getDonorName(
+      session
     );
 
-  await supabaseRequest(
+  const donorEmail =
+    getDonorEmail(
+      session
+    );
+
+  const amountCents =
+    Number(
+      session.amount_total || 0
+    );
+
+  await recordDonation(
     env,
-    "donations?on_conflict=stripe_session_id",
     {
-      method: "POST",
+      session,
 
-      headers: {
-        Prefer:
-          "resolution=merge-duplicates,return=representation",
-      },
+      teamKey,
 
-      body: {
-        team_key:
-          teamKey,
+      teamId:
+        team.id,
 
-        player_key:
-          playerKey,
+      playerId:
+        player?.id ||
+        null,
 
-        donation_type:
-          donationType,
+      playerKey:
+        player?.player_key ||
+        null,
 
-        amount,
+      donationType,
 
-        donor_name:
-          donorName,
+      amountCents,
 
-        stripe_session_id:
-          sessionId,
+      donorName,
 
-        stripe_payment_intent_id:
-          session.payment_intent
-            ? String(
-                session.payment_intent
-              )
-            : null,
-      },
+      donorEmail,
+
+      balls: [],
     }
   );
 
   return {
-    teamKey,
-    playerKey,
-    donationType,
-    amount,
-    donorName,
+    type:
+      donationType,
+
+    player:
+      player?.player_key ||
+      null,
+
+    amountCents,
   };
 }
 
-/* -------------------------------------------------------
-   MAIN WEBHOOK
-------------------------------------------------------- */
+// ============================================================
+// MAIN WEBHOOK
+// ============================================================
 
 export async function onRequestPost({
   request,
   env,
 }) {
   try {
+    // ------------------------------------------------------
+    // Required config
+    // ------------------------------------------------------
+
     if (
       !env.STRIPE_WEBHOOK_SECRET ||
       !env.SUPABASE_URL ||
@@ -687,34 +925,38 @@ export async function onRequestPost({
         {
           success: false,
           error:
-            "Missing webhook server configuration.",
+            "Missing webhook configuration.",
         },
         500
       );
     }
 
-    /*
-      IMPORTANT:
-      Stripe verification requires the
-      exact raw request body.
-    */
+    // ------------------------------------------------------
+    // IMPORTANT:
+    // Read raw body BEFORE parsing JSON.
+    // Stripe signature verification requires exact raw body.
+    // ------------------------------------------------------
 
     const rawBody =
       await request.text();
 
-    const stripeSignature =
+    const signature =
       request.headers.get(
         "stripe-signature"
       );
 
-    const validSignature =
+    const verified =
       await verifyStripeSignature(
         rawBody,
-        stripeSignature,
+        signature,
         env.STRIPE_WEBHOOK_SECRET
       );
 
-    if (!validSignature) {
+    if (!verified) {
+      console.error(
+        "Invalid Stripe webhook signature."
+      );
+
       return json(
         {
           success: false,
@@ -725,35 +967,44 @@ export async function onRequestPost({
       );
     }
 
+    // ------------------------------------------------------
+    // Parse event
+    // ------------------------------------------------------
+
     let event;
 
     try {
       event =
-        JSON.parse(rawBody);
+        JSON.parse(
+          rawBody
+        );
     } catch {
       return json(
         {
           success: false,
           error:
-            "Invalid Stripe event.",
+            "Invalid webhook payload.",
         },
         400
       );
     }
 
-    /*
-      We only need successful Checkout
-      payments for this fundraiser.
-    */
+    // ------------------------------------------------------
+    // Only handle payment-success events we subscribed to
+    // ------------------------------------------------------
+
+    const supportedEvents =
+      new Set([
+        "checkout.session.completed",
+        "checkout.session.async_payment_succeeded",
+      ]);
 
     if (
-      event.type !==
-        "checkout.session.completed" &&
-      event.type !==
-        "checkout.session.async_payment_succeeded"
+      !supportedEvents.has(
+        event.type
+      )
     ) {
       return json({
-        success: true,
         received: true,
         ignored: true,
         eventType:
@@ -762,56 +1013,91 @@ export async function onRequestPost({
     }
 
     const session =
-      event?.data?.object;
+      event.data?.object;
 
-    if (!session) {
-      throw new Error(
-        "Stripe event is missing checkout session."
+    if (!session?.id) {
+      return json(
+        {
+          success: false,
+          error:
+            "Missing Checkout Session.",
+        },
+        400
       );
     }
 
-    /*
-      checkout.session.completed can occur
-      before some delayed payment methods
-      actually settle.
-
-      Only process completed payments.
-    */
+    // ------------------------------------------------------
+    // Only process paid sessions
+    // ------------------------------------------------------
 
     if (
-      session.payment_status &&
       session.payment_status !==
-        "paid"
+      "paid"
     ) {
       return json({
-        success: true,
         received: true,
         ignored: true,
         reason:
-          "Payment is not paid yet.",
+          "Session is not paid.",
+        paymentStatus:
+          session.payment_status,
       });
     }
 
     const metadata =
       session.metadata || {};
 
+    // ------------------------------------------------------
+    // SECURITY:
+    // This Cloudflare project should only process its team.
+    // ------------------------------------------------------
+
+    if (
+      metadata.team_key &&
+      metadata.team_key !==
+        env.TEAM_KEY
+    ) {
+      console.error(
+        "Webhook team mismatch:",
+        metadata.team_key,
+        env.TEAM_KEY
+      );
+
+      return json(
+        {
+          success: false,
+          error:
+            "Webhook team mismatch.",
+        },
+        400
+      );
+    }
+
     const donationType =
-      String(
-        metadata.donation_type || ""
-      ).trim();
+      metadata.donation_type;
 
     let result;
+
+    // ------------------------------------------------------
+    // Baseball sponsorship
+    // ------------------------------------------------------
 
     if (
       donationType ===
       "baseballs"
     ) {
       result =
-        await processBaseballPayment(
+        await processBaseballDonation(
           env,
           session
         );
-    } else if (
+    }
+
+    // ------------------------------------------------------
+    // Team/player custom donation
+    // ------------------------------------------------------
+
+    else if (
       donationType ===
         "team_general" ||
       donationType ===
@@ -822,47 +1108,47 @@ export async function onRequestPost({
           env,
           session
         );
-    } else {
+    }
+
+    // ------------------------------------------------------
+    // Unknown checkout type
+    // ------------------------------------------------------
+
+    else {
       return json({
-        success: true,
         received: true,
         ignored: true,
         reason:
           "Unknown donation type.",
+        donationType:
+          donationType || null,
       });
     }
+
+    // ------------------------------------------------------
+    // SUCCESS
+    // ------------------------------------------------------
 
     return json({
       success: true,
       received: true,
-      processed: true,
-
-      eventId:
-        event.id,
-
-      donationType,
-
+      eventType:
+        event.type,
+      sessionId:
+        session.id,
       result,
     });
-
   } catch (error) {
     console.error(
-      "Webhook processing error:",
+      "Webhook processing failed:",
       error
     );
-
-    /*
-      Returning 500 tells Stripe to retry
-      the webhook automatically.
-    */
 
     return json(
       {
         success: false,
-
         error:
           "Webhook processing failed.",
-
         details:
           error?.message ||
           String(error),
