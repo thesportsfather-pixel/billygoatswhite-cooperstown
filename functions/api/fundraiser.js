@@ -1,335 +1,657 @@
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store",
-    },
-  });
-}
-
-async function supabaseGet(env, path) {
-  const key = env.SUPABASE_SERVICE_ROLE_KEY;
-
-  const response = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/${path}`,
+  return new Response(
+    JSON.stringify(data),
     {
+      status,
       headers: {
-        apikey: key,
-        authorization: `Bearer ${key}`,
-        accept: "application/json",
-      },
+        "content-type":
+          "application/json; charset=utf-8",
+        "cache-control":
+          "no-store"
+      }
     }
   );
+}
 
-  const text = await response.text();
 
-  if (!response.ok) {
+/* =========================
+   SUPABASE GET
+========================= */
+
+async function supabaseGet(
+  env,
+  path
+) {
+
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/${path}`,
+      {
+        method:
+          "GET",
+
+        headers: {
+          apikey:
+            env.SUPABASE_SERVICE_ROLE_KEY,
+
+          authorization:
+            `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+
+          accept:
+            "application/json"
+        }
+      }
+    );
+
+  const text =
+    await response.text();
+
+  if (
+    !response.ok
+  ) {
+
     throw new Error(
       `Supabase ${response.status}: ${text}`
     );
+
   }
 
-  return text ? JSON.parse(text) : [];
+  return text
+    ? JSON.parse(text)
+    : [];
+
 }
+
+
+/* =========================
+   MAIN
+========================= */
 
 export async function onRequestGet({
   request,
-  env,
+  env
 }) {
+
   try {
-    // =====================================================
-    // REQUIRED ENVIRONMENT VARIABLES
-    // =====================================================
+
+    /* =========================
+       CONFIG
+    ========================= */
 
     if (
       !env.SUPABASE_URL ||
       !env.SUPABASE_SERVICE_ROLE_KEY ||
       !env.TEAM_KEY
     ) {
+
       return json(
         {
           success: false,
-          error: "Missing server configuration.",
+          error:
+            "Missing server configuration."
         },
         500
       );
+
     }
 
-    // =====================================================
-    // GET PLAYER SLUG
-    // =====================================================
 
-    const url = new URL(request.url);
+    /* =========================
+       PLAYER KEY
+    ========================= */
 
-    const playerKey = (
-      url.searchParams.get("player") || ""
-    )
-      .trim()
-      .toLowerCase();
+    const url =
+      new URL(
+        request.url
+      );
 
-    if (!playerKey) {
+    const playerKey =
+      String(
+        url.searchParams.get(
+          "player"
+        ) || ""
+      ).trim();
+
+
+    if (
+      !playerKey
+    ) {
+
       return json(
         {
           success: false,
-          error: "Missing player.",
+          error:
+            "Player is required."
         },
         400
       );
+
     }
 
-    // =====================================================
-    // FIND TEAM
-    // =====================================================
 
-    const teamRows = await supabaseGet(
-      env,
-      [
-        "teams",
-        "?select=id,team_key,team_name",
-        `&team_key=eq.${encodeURIComponent(
+    /* =========================
+       TEAM
+    ========================= */
+
+    const teams =
+      await supabaseGet(
+        env,
+        `teams?team_key=eq.${encodeURIComponent(
           env.TEAM_KEY
-        )}`,
-        "&limit=1",
-      ].join("")
-    );
+        )}&select=id,team_key,team_name,website_domain,primary_color,secondary_color,logo_url&limit=1`
+      );
 
-    if (!teamRows.length) {
+
+    if (
+      !teams.length
+    ) {
+
       return json(
         {
           success: false,
-          error: "Team not found.",
+          error:
+            "Team not found."
         },
         404
       );
+
     }
 
-    const team = teamRows[0];
 
-    // =====================================================
-    // FIND PLAYER
-    // =====================================================
+    const team =
+      teams[0];
 
-    const playerRows = await supabaseGet(
-      env,
-      [
-        "players",
-        "?select=id,player_key,player_name,player_number,slug,name",
-        `&team_id=eq.${encodeURIComponent(
+
+    /* =========================
+       PLAYER
+    ========================= */
+
+    const players =
+      await supabaseGet(
+        env,
+        `players?team_id=eq.${encodeURIComponent(
           team.id
-        )}`,
-        `&player_key=eq.${encodeURIComponent(
+        )}&player_key=eq.${encodeURIComponent(
           playerKey
-        )}`,
-        "&limit=1",
-      ].join("")
-    );
+        )}&select=id,player_key,player_name,player_number,slug,name&limit=1`
+      );
 
-    if (!playerRows.length) {
+
+    if (
+      !players.length
+    ) {
+
       return json(
         {
           success: false,
-          error: "Player not found.",
+          error:
+            "Player not found."
         },
         404
       );
+
     }
 
-    const player = playerRows[0];
 
-    // =====================================================
-    // GET ALL 100 BASEBALLS
-    // =====================================================
+    const player =
+      players[0];
 
-    const baseballRows = await supabaseGet(
-      env,
-      [
-        "baseballs",
-        "?select=id,ball_number,amount_cents,status,donor_name,donor_email,sold_at,stripe_session_id",
-        `&player_id=eq.${encodeURIComponent(
+
+    /* =========================
+       BASEBALLS
+    ========================= */
+
+    const baseballRows =
+      await supabaseGet(
+        env,
+        `baseballs?player_id=eq.${encodeURIComponent(
           player.id
-        )}`,
-        "&order=ball_number.asc",
-      ].join("")
-    );
+        )}&select=id,ball_number,amount_cents,status,reserved_until,reservation_id,sold_at,stripe_session_id,donor_name,donor_email&order=ball_number.asc`
+      );
 
-    // =====================================================
-    // NORMALIZE BASEBALL DATA
-    // =====================================================
 
-    const baseballs = baseballRows.map(
-      (ball) => {
-        const ballNumber =
-          Number(ball.ball_number);
+    /* =========================
+       NORMALIZE BASEBALLS
+    ========================= */
 
-        const amountCents =
-          Number(ball.amount_cents || 0);
+    const baseballs =
+      baseballRows.map(
+        row => {
 
-        const status =
-          String(
-            ball.status || "available"
-          ).toLowerCase();
+          const status =
+            String(
+              row.status ||
+              "available"
+            ).toLowerCase();
 
-        const sold =
-          status === "sold";
+          const sold =
+            status ===
+            "sold";
 
-        const reserved =
-          status === "reserved";
+          const reserved =
+            status ===
+            "reserved";
 
-        return {
-          id: ball.id,
+          const donorName =
+            sold
+              ? (
+                  String(
+                    row.donor_name ||
+                    ""
+                  ).trim() ||
+                  "Anonymous"
+                )
+              : "";
 
-          ballNumber,
+          return {
 
-          ball_number: ballNumber,
+            id:
+              row.id,
 
-          amountCents,
+            ball_number:
+              Number(
+                row.ball_number
+              ),
 
-          amount_cents: amountCents,
+            ballNumber:
+              Number(
+                row.ball_number
+              ),
 
-          amount:
-            amountCents / 100,
+            number:
+              Number(
+                row.ball_number
+              ),
 
-          status,
+            amount_cents:
+              Number(
+                row.amount_cents ||
+                0
+              ),
 
-          sold,
+            amount:
+              Number(
+                row.amount_cents ||
+                0
+              ) / 100,
 
-          reserved,
+            status,
 
-          donorName:
-            ball.donor_name || null,
+            sold,
 
-          donor_name:
-            ball.donor_name || null,
+            reserved,
 
-          soldAt:
-            ball.sold_at || null,
+            reserved_until:
+              row.reserved_until,
 
-          sold_at:
-            ball.sold_at || null,
-        };
-      }
-    );
+            reservation_id:
+              row.reservation_id,
 
-    // =====================================================
-    // SOLD BASEBALLS
-    // =====================================================
+            sold_at:
+              row.sold_at,
+
+            stripe_session_id:
+              row.stripe_session_id,
+
+            donor_name:
+              donorName,
+
+            donorName,
+
+            donor_email:
+              row.donor_email || null
+
+          };
+
+        }
+      );
+
+
+    /* =========================
+       BASEBALL TOTALS
+    ========================= */
 
     const soldBaseballs =
       baseballs.filter(
-        (ball) => ball.sold
+        ball =>
+          ball.sold
       );
 
-    const soldBalls =
-      soldBaseballs.map(
-        (ball) => ball.ballNumber
-      );
 
-    // =====================================================
-    // AMOUNT RAISED
-    // =====================================================
-
-    const amountRaisedCents =
+    const baseballRaisedCents =
       soldBaseballs.reduce(
-        (total, ball) =>
-          total + ball.amountCents,
+        (
+          total,
+          ball
+        ) =>
+          total +
+          Number(
+            ball.amount_cents ||
+            ball.ball_number *
+            100
+          ),
         0
       );
 
-    const amountRaised =
-      amountRaisedCents / 100;
 
-    // =====================================================
-    // RESERVED BALLS
-    // =====================================================
+    /* =========================
+       CUSTOM PLAYER DONATIONS
+    ========================= */
+
+    let generalDonations =
+      [];
+
+
+    try {
+
+      generalDonations =
+        await supabaseGet(
+          env,
+          `donations?team_key=eq.${encodeURIComponent(
+            env.TEAM_KEY
+          )}&player_id=eq.${encodeURIComponent(
+            player.id
+          )}&donation_type=eq.player_general&select=id,amount_cents,donor_name,donor_email,stripe_session_id,created_at&order=created_at.desc`
+        );
+
+    } catch (
+      donationError
+    ) {
+
+      /*
+        Keep fundraiser usable even
+        if the donations table has
+        an issue.
+      */
+
+      console.error(
+        "Unable to load custom donations:",
+        donationError
+      );
+
+      generalDonations =
+        [];
+
+    }
+
+
+    const generalRaisedCents =
+      generalDonations.reduce(
+        (
+          total,
+          donation
+        ) =>
+          total +
+          Number(
+            donation.amount_cents ||
+            0
+          ),
+        0
+      );
+
+
+    /* =========================
+       COMBINED TOTAL
+    ========================= */
+
+    const totalRaisedCents =
+      baseballRaisedCents +
+      generalRaisedCents;
+
+
+    const goalCents =
+      505000;
+
+
+    const percentage =
+      Math.min(
+        100,
+        Math.max(
+          0,
+          (
+            totalRaisedCents /
+            goalCents
+          ) *
+          100
+        )
+      );
+
+
+    /* =========================
+       SOLD / RESERVED ARRAYS
+    ========================= */
+
+    const soldBalls =
+      soldBaseballs.map(
+        ball =>
+          ball.ball_number
+      );
+
 
     const reservedBalls =
       baseballs
         .filter(
-          (ball) => ball.reserved
+          ball =>
+            ball.reserved
         )
         .map(
-          (ball) =>
-            ball.ballNumber
+          ball =>
+            ball.ball_number
         );
 
-    // =====================================================
-    // RETURN FUNDRAISER DATA
-    // =====================================================
 
-    return json({
-      success: true,
+    /* =========================
+       RESPONSE
+    ========================= */
 
-      team: {
-        id: team.id,
-        key: team.team_key,
-        name: team.team_name,
-      },
+    return json(
+      {
+        success: true,
 
-      player: {
-        id: player.id,
+        team: {
+          id:
+            team.id,
 
-        key:
-          player.player_key,
+          key:
+            team.team_key,
 
-        playerKey:
-          player.player_key,
+          teamKey:
+            team.team_key,
 
-        slug:
-          player.slug ||
-          player.player_key,
+          name:
+            team.team_name,
 
-        name:
-          player.player_name ||
-          player.name,
+          teamName:
+            team.team_name,
 
-        playerName:
-          player.player_name ||
-          player.name,
+          websiteDomain:
+            team.website_domain,
 
-        number:
-          player.player_number,
+          primaryColor:
+            team.primary_color,
 
-        playerNumber:
-          player.player_number,
-      },
+          secondaryColor:
+            team.secondary_color,
 
-      baseballs,
+          logoUrl:
+            team.logo_url
+        },
 
-      soldBalls,
 
-      reservedBalls,
+        player: {
+          id:
+            player.id,
 
-      ballsSold:
-        soldBalls.length,
+          key:
+            player.player_key,
 
-      amountRaised,
+          playerKey:
+            player.player_key,
 
-      amountRaisedCents,
+          name:
+            player.player_name,
 
-      goal: 5050,
+          playerName:
+            player.player_name,
 
-      goalCents: 505000,
+          number:
+            player.player_number,
 
-      totalBalls:
-        baseballs.length,
-    });
-  } catch (error) {
+          playerNumber:
+            player.player_number,
+
+          slug:
+            player.slug ||
+            player.player_key
+        },
+
+
+        baseballs,
+
+
+        soldBalls,
+
+
+        reservedBalls,
+
+
+        ballsSold:
+          soldBaseballs.length,
+
+
+        totalBalls:
+          baseballs.length,
+
+
+        baseballRaisedCents,
+
+
+        baseballRaised:
+          baseballRaisedCents /
+          100,
+
+
+        generalRaisedCents,
+
+
+        generalRaised:
+          generalRaisedCents /
+          100,
+
+
+        amountRaisedCents:
+          totalRaisedCents,
+
+
+        amountRaised:
+          totalRaisedCents /
+          100,
+
+
+        goalCents,
+
+
+        goal:
+          goalCents /
+          100,
+
+
+        percentage,
+
+
+        totals: {
+
+          soldCount:
+            soldBaseballs.length,
+
+          totalBalls:
+            baseballs.length,
+
+          baseballRaisedCents,
+
+          baseballRaisedDollars:
+            baseballRaisedCents /
+            100,
+
+          generalRaisedCents,
+
+          generalRaisedDollars:
+            generalRaisedCents /
+            100,
+
+          raisedCents:
+            totalRaisedCents,
+
+          raisedDollars:
+            totalRaisedCents /
+            100,
+
+          goalCents,
+
+          goalDollars:
+            goalCents /
+            100,
+
+          percentage
+
+        },
+
+
+        generalDonations:
+          generalDonations.map(
+            donation => ({
+              amountCents:
+                Number(
+                  donation.amount_cents ||
+                  0
+                ),
+
+              amount:
+                Number(
+                  donation.amount_cents ||
+                  0
+                ) / 100,
+
+              donorName:
+                String(
+                  donation.donor_name ||
+                  ""
+                ).trim() ||
+                "Anonymous",
+
+              createdAt:
+                donation.created_at
+            })
+          )
+
+      }
+    );
+
+
+  } catch (
+    error
+  ) {
+
     console.error(
       "Fundraiser API error:",
       error
     );
 
+
     return json(
       {
         success: false,
+
         error:
-          "Unable to load fundraiser.",
-        details:
-          error?.message ||
-          String(error),
+          error instanceof Error
+            ? error.message
+            : String(
+                error
+              )
       },
       500
     );
+
   }
+
 }
