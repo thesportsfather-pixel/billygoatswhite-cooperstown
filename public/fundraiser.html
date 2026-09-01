@@ -24,9 +24,14 @@
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
+
       background:
         radial-gradient(
           circle at top,
@@ -39,6 +44,7 @@
           #0b2447 430px,
           #f5f8fc 430px
         );
+
       color: var(--navy);
       min-height: 100vh;
     }
@@ -54,6 +60,8 @@
       padding: 22px 0 60px;
     }
 
+    /* BACK BUTTON */
+
     .back-row {
       margin-bottom: 14px;
     }
@@ -62,18 +70,24 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      border: 1px solid rgba(255,255,255,0.24);
-      background: rgba(255,255,255,0.10);
+
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(255, 255, 255, 0.10);
+
       color: white;
       text-decoration: none;
+
       padding: 10px 14px;
       border-radius: 11px;
+
       font-weight: 800;
       font-size: 14px;
+
+      transition: background .15s ease;
     }
 
     .back-button:hover {
-      background: rgba(255,255,255,0.16);
+      background: rgba(255, 255, 255, 0.16);
     }
 
     /* HERO */
@@ -82,48 +96,69 @@
       background:
         linear-gradient(
           135deg,
-          rgba(7,26,54,0.99),
-          rgba(11,36,71,0.98)
+          rgba(7, 26, 54, 0.99),
+          rgba(11, 36, 71, 0.98)
         );
+
       color: white;
+
       border-radius: 26px;
       padding: 28px;
-      box-shadow: 0 20px 55px rgba(0,0,0,0.28);
+
+      box-shadow:
+        0 20px 55px rgba(0, 0, 0, 0.28);
+
       position: relative;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.12);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.12);
     }
 
     .hero::after {
       content: "";
+
       position: absolute;
+
       width: 340px;
       height: 340px;
+
       border-radius: 50%;
+
       right: -150px;
       top: -190px;
-      background: rgba(21,169,229,0.16);
+
+      background:
+        rgba(21, 169, 229, 0.16);
     }
 
     .hero-inner {
       display: flex;
       align-items: center;
       gap: 22px;
+
       position: relative;
       z-index: 2;
     }
 
     .hero-logo {
       flex: 0 0 125px;
+
       width: 125px;
       height: 125px;
+
       border-radius: 20px;
+
       background: white;
+
       padding: 12px;
+
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+
+      box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.22);
     }
 
     .hero-logo img {
@@ -138,17 +173,25 @@
 
     .team-label {
       color: var(--light-blue);
+
       text-transform: uppercase;
+
       letter-spacing: 1.5px;
+
       font-weight: 900;
       font-size: 12px;
+
       margin-bottom: 7px;
     }
 
     .player-title {
       margin: 0;
-      font-size: clamp(34px, 6vw, 60px);
+
+      font-size:
+        clamp(34px, 6vw, 60px);
+
       line-height: 1;
+
       letter-spacing: -1.8px;
     }
 
@@ -158,9 +201,13 @@
 
     .hero-subtitle {
       margin: 11px 0 0;
+
       color: #d6e6f5;
+
       line-height: 1.5;
+
       max-width: 650px;
+
       font-size: 16px;
     }
 
@@ -168,30 +215,49 @@
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+
+      grid-template-columns:
+        repeat(3, 1fr);
+
       gap: 12px;
+
       margin-top: 18px;
+
+      position: relative;
+      z-index: 2;
     }
 
     .stat {
-      background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(255,255,255,0.12);
+      background:
+        rgba(255, 255, 255, 0.10);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.12);
+
       border-radius: 14px;
+
       padding: 14px;
     }
 
     .stat-label {
       font-size: 11px;
+
       text-transform: uppercase;
+
       letter-spacing: 1px;
+
       color: #a9c8df;
+
       font-weight: 900;
+
       margin-bottom: 4px;
     }
 
     .stat-value {
       font-weight: 900;
+
       font-size: 23px;
+
       color: white;
     }
 
@@ -199,140 +265,426 @@
 
     .fundraiser-card {
       margin-top: 22px;
+
       background: white;
+
       border-radius: 25px;
+
       padding: 26px;
-      box-shadow: 0 14px 36px rgba(7,26,54,0.10);
-      border: 1px solid #e2e8f0;
+
+      box-shadow:
+        0 14px 36px rgba(7, 26, 54, 0.10);
+
+      border:
+        1px solid #e2e8f0;
     }
 
     .section-heading {
       text-align: center;
-      margin-bottom: 22px;
+
+      margin-bottom: 26px;
     }
 
     .section-heading .small {
       color: var(--blue);
+
       text-transform: uppercase;
+
       letter-spacing: 1.4px;
+
       font-weight: 900;
+
       font-size: 12px;
     }
 
     .section-heading h2 {
       margin: 5px 0 7px;
-      font-size: clamp(27px, 4vw, 40px);
+
+      font-size:
+        clamp(27px, 4vw, 40px);
+
       letter-spacing: -1px;
     }
 
     .section-heading p {
       margin: 0 auto;
+
       color: var(--gray);
+
       max-width: 720px;
+
       line-height: 1.55;
     }
 
-    /* BALLS */
+    /* ========================================
+       BASEBALL GRID
+       ======================================== */
 
     .balls-grid {
       display: grid;
-      grid-template-columns: repeat(10, minmax(0, 1fr));
-      gap: 10px;
+
+      grid-template-columns:
+        repeat(10, minmax(0, 1fr));
+
+      gap: 12px;
     }
+
+    /* INDIVIDUAL BASEBALL */
 
     .ball {
       aspect-ratio: 1 / 1;
+
+      width: 100%;
+
       border: 0;
-      background: white;
+
       border-radius: 50%;
+
       cursor: pointer;
+
       position: relative;
+
+      overflow: hidden;
+
       display: flex;
+
       align-items: center;
       justify-content: center;
-      font-weight: 900;
-      font-size: 15px;
-      color: var(--navy);
+
+      isolation: isolate;
+
+      background:
+        radial-gradient(
+          circle at 36% 28%,
+          #ffffff 0%,
+          #ffffff 28%,
+          #fbfcfd 48%,
+          #f1f4f7 75%,
+          #d9e0e7 100%
+        );
+
       box-shadow:
-        inset 0 0 0 2px #d6dee8,
-        0 4px 9px rgba(0,0,0,0.08);
+        inset -5px -7px 11px rgba(7, 26, 54, .09),
+        inset 3px 3px 7px rgba(255, 255, 255, .96),
+        0 5px 11px rgba(7, 26, 54, .13);
+
       transition:
-        transform .12s ease,
-        box-shadow .12s ease,
-        background .12s ease;
+        transform .14s ease,
+        box-shadow .14s ease,
+        filter .14s ease;
     }
 
-    /* baseball seams */
-    .ball::before,
-    .ball::after {
-      content: "";
+    /*
+      The two large curved seam shapes sit partially
+      outside the baseball, creating the classic
+      curved seams of a real ball.
+    */
+
+    .ball-seam {
       position: absolute;
-      top: 20%;
-      bottom: 20%;
-      width: 18%;
-      border-top: 2px dashed #dc2626;
-      border-bottom: 2px dashed #dc2626;
-      opacity: .8;
+
+      z-index: 1;
+
+      top: 4%;
+
+      width: 79%;
+      height: 92%;
+
+      border-radius: 50%;
+
+      pointer-events: none;
     }
 
-    .ball::before {
+    .ball-seam.left {
+      left: -48%;
+
+      border-right:
+        2.4px solid #d92d20;
+    }
+
+    .ball-seam.right {
+      right: -48%;
+
+      border-left:
+        2.4px solid #d92d20;
+    }
+
+    /*
+      Small angled stitch marks
+    */
+
+    .stitches {
+      position: absolute;
+
+      inset: 0;
+
+      z-index: 2;
+
+      pointer-events: none;
+    }
+
+    .stitch {
+      position: absolute;
+
+      width: 8px;
+      height: 2px;
+
+      border-radius: 2px;
+
+      background: #d92d20;
+
+      opacity: .92;
+    }
+
+    /* LEFT STITCHES */
+
+    .stitch.l1 {
+      left: 15%;
+      top: 22%;
+      transform: rotate(45deg);
+    }
+
+    .stitch.l2 {
+      left: 11%;
+      top: 32%;
+      transform: rotate(34deg);
+    }
+
+    .stitch.l3 {
       left: 9%;
-      transform: rotate(70deg);
+      top: 43%;
+      transform: rotate(20deg);
     }
 
-    .ball::after {
-      right: 9%;
-      transform: rotate(-70deg);
+    .stitch.l4 {
+      left: 9%;
+      top: 55%;
+      transform: rotate(-20deg);
     }
+
+    .stitch.l5 {
+      left: 11%;
+      top: 66%;
+      transform: rotate(-34deg);
+    }
+
+    .stitch.l6 {
+      left: 15%;
+      top: 76%;
+      transform: rotate(-45deg);
+    }
+
+    /* RIGHT STITCHES */
+
+    .stitch.r1 {
+      right: 15%;
+      top: 22%;
+      transform: rotate(-45deg);
+    }
+
+    .stitch.r2 {
+      right: 11%;
+      top: 32%;
+      transform: rotate(-34deg);
+    }
+
+    .stitch.r3 {
+      right: 9%;
+      top: 43%;
+      transform: rotate(-20deg);
+    }
+
+    .stitch.r4 {
+      right: 9%;
+      top: 55%;
+      transform: rotate(20deg);
+    }
+
+    .stitch.r5 {
+      right: 11%;
+      top: 66%;
+      transform: rotate(34deg);
+    }
+
+    .stitch.r6 {
+      right: 15%;
+      top: 76%;
+      transform: rotate(45deg);
+    }
+
+    /* NUMBER */
+
+    .ball-number {
+      position: relative;
+
+      z-index: 5;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      width: 58%;
+      height: 58%;
+
+      border-radius: 50%;
+
+      color: var(--navy);
+
+      font-size:
+        clamp(14px, 1.6vw, 19px);
+
+      line-height: 1;
+
+      font-weight: 900;
+
+      letter-spacing: -.5px;
+
+      text-shadow:
+        0 1px 0 rgba(255, 255, 255, .9);
+    }
+
+    /* HOVER */
 
     .ball:hover:not(.sold) {
-      transform: translateY(-2px) scale(1.04);
+      transform:
+        translateY(-3px)
+        scale(1.055);
+
       box-shadow:
-        inset 0 0 0 3px var(--blue),
-        0 8px 16px rgba(21,169,229,0.18);
+        inset -5px -7px 11px rgba(7, 26, 54, .08),
+        inset 3px 3px 7px rgba(255, 255, 255, .96),
+        0 0 0 3px rgba(21, 169, 229, .25),
+        0 10px 20px rgba(21, 169, 229, .22);
     }
+
+    /* SELECTED BALL */
 
     .ball.selected {
-      background: var(--blue);
-      color: white;
+      background:
+        radial-gradient(
+          circle at 36% 28%,
+          #4bd0ff 0%,
+          #26b8ed 28%,
+          #15a9e5 60%,
+          #0c8fc4 100%
+        );
+
       box-shadow:
-        inset 0 0 0 3px var(--navy),
-        0 6px 15px rgba(21,169,229,0.24);
+        inset -5px -7px 11px rgba(7, 26, 54, .18),
+        inset 3px 3px 7px rgba(255, 255, 255, .22),
+        0 0 0 4px var(--navy),
+        0 9px 20px rgba(21, 169, 229, .30);
+
+      transform:
+        scale(1.03);
     }
 
-    .ball.selected::before,
-    .ball.selected::after {
-      border-color: white;
+    .ball.selected .ball-number {
+      color: white;
+
+      text-shadow:
+        0 2px 3px rgba(7, 26, 54, .35);
     }
+
+    .ball.selected .ball-seam.left {
+      border-right-color: white;
+    }
+
+    .ball.selected .ball-seam.right {
+      border-left-color: white;
+    }
+
+    .ball.selected .stitch {
+      background: white;
+    }
+
+    /* SOLD BALL */
 
     .ball.sold {
-      background: #e5e7eb;
-      color: #9ca3af;
       cursor: not-allowed;
-      box-shadow: inset 0 0 0 2px #d1d5db;
+
+      background:
+        radial-gradient(
+          circle at 36% 28%,
+          #f3f4f6 0%,
+          #e8eaed 55%,
+          #d2d6db 100%
+        );
+
+      box-shadow:
+        inset -4px -5px 8px rgba(0, 0, 0, .05),
+        0 2px 5px rgba(0, 0, 0, .06);
+
+      filter: grayscale(.65);
+
+      opacity: .64;
     }
 
-    .ball.sold::before,
+    .ball.sold .ball-number {
+      color: #7d8792;
+
+      transform:
+        translateY(-3px);
+    }
+
+    .ball.sold .ball-seam,
+    .ball.sold .stitches {
+      opacity: .28;
+    }
+
     .ball.sold::after {
-      opacity: .25;
+      content: "SOLD";
+
+      position: absolute;
+
+      z-index: 10;
+
+      left: 50%;
+
+      bottom: 13%;
+
+      transform:
+        translateX(-50%);
+
+      color: #6b7280;
+
+      font-size:
+        clamp(6px, .65vw, 9px);
+
+      font-weight: 900;
+
+      letter-spacing: .6px;
     }
 
     /* CHECKOUT */
 
     .checkout-bar {
       position: sticky;
+
       bottom: 14px;
+
       z-index: 20;
+
       margin-top: 24px;
+
       background: var(--navy);
+
       color: white;
+
       border-radius: 18px;
+
       padding: 17px 18px;
+
       display: flex;
+
       align-items: center;
       justify-content: space-between;
+
       gap: 18px;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.28);
+
+      box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.28);
     }
 
     .checkout-info {
@@ -341,35 +693,60 @@
 
     .checkout-label {
       font-size: 11px;
+
       text-transform: uppercase;
+
       letter-spacing: 1px;
+
       color: #9ec7df;
+
       font-weight: 900;
     }
 
     .checkout-total {
       margin-top: 3px;
+
       font-size: 24px;
+
       font-weight: 900;
     }
 
     .checkout-balls {
       color: #cce4f2;
+
       font-size: 12px;
+
       margin-top: 3px;
+
       line-height: 1.4;
     }
 
     .checkout-button {
       flex: 0 0 auto;
+
       border: 0;
+
       background: var(--blue);
+
       color: white;
+
       font-weight: 900;
+
       border-radius: 12px;
+
       padding: 14px 21px;
+
       cursor: pointer;
+
       font-size: 15px;
+
+      transition:
+        transform .12s ease,
+        opacity .12s ease;
+    }
+
+    .checkout-button:hover:not(:disabled) {
+      transform: translateY(-1px);
     }
 
     .checkout-button:disabled {
@@ -381,43 +758,65 @@
 
     .general-donation {
       margin-top: 24px;
+
       background: #f2f8fc;
-      border: 1px solid #dceaf4;
+
+      border:
+        1px solid #dceaf4;
+
       border-radius: 18px;
+
       padding: 20px;
+
       display: flex;
+
       align-items: center;
       justify-content: space-between;
+
       gap: 20px;
     }
 
     .general-donation h3 {
       margin: 0 0 5px;
+
       font-size: 20px;
     }
 
     .general-donation p {
       margin: 0;
+
       color: var(--gray);
+
       font-size: 14px;
     }
 
     .general-button {
       flex: 0 0 auto;
+
       background: white;
-      border: 2px solid var(--blue);
+
+      border:
+        2px solid var(--blue);
+
       color: var(--navy);
+
       border-radius: 11px;
+
       padding: 12px 16px;
+
       font-weight: 900;
+
       cursor: pointer;
     }
 
     .loading,
     .error-box {
       padding: 30px;
+
       text-align: center;
+
       font-weight: 800;
+
       color: var(--gray);
     }
 
@@ -429,11 +828,18 @@
 
     .modal-backdrop {
       display: none;
+
       position: fixed;
+
       inset: 0;
+
       z-index: 999;
-      background: rgba(2,10,20,.78);
+
+      background:
+        rgba(2, 10, 20, .78);
+
       padding: 20px;
+
       align-items: center;
       justify-content: center;
     }
@@ -444,93 +850,135 @@
 
     .modal {
       width: min(460px, 100%);
+
       background: white;
+
       border-radius: 22px;
+
       padding: 26px;
+
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, .35);
     }
 
     .modal h3 {
       margin: 0 0 8px;
+
       font-size: 25px;
     }
 
     .modal p {
       color: var(--gray);
+
       margin: 0 0 18px;
+
       line-height: 1.5;
     }
 
     .modal label {
       display: block;
+
       font-weight: 900;
+
       font-size: 13px;
+
       margin-bottom: 7px;
     }
 
     .modal input {
       width: 100%;
+
       padding: 13px;
+
       border-radius: 10px;
-      border: 1px solid #cfd8e3;
+
+      border:
+        1px solid #cfd8e3;
+
       outline: none;
+
       font-size: 16px;
     }
 
     .modal input:focus {
       border-color: var(--blue);
+
+      box-shadow:
+        0 0 0 3px rgba(21, 169, 229, .12);
     }
 
     .modal-actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+
+      grid-template-columns:
+        1fr 1fr;
+
       gap: 10px;
+
       margin-top: 17px;
     }
 
     .modal-actions button {
       border: 0;
+
       border-radius: 10px;
+
       padding: 13px;
+
       font-weight: 900;
+
       cursor: pointer;
     }
 
     .cancel-btn {
       background: #edf1f5;
+
       color: var(--navy);
     }
 
     .donate-btn {
       background: var(--blue);
+
       color: white;
     }
 
     .modal-error {
       margin-top: 10px;
+
       font-size: 13px;
+
       color: var(--red);
+
       font-weight: 800;
     }
 
     footer {
       text-align: center;
+
       padding: 28px 0 0;
+
       color: #778598;
+
       font-size: 13px;
     }
 
+    /* TABLET */
+
     @media (max-width: 900px) {
       .balls-grid {
-        grid-template-columns: repeat(8, minmax(0, 1fr));
+        grid-template-columns:
+          repeat(8, minmax(0, 1fr));
       }
     }
+
+    /* MOBILE */
 
     @media (max-width: 700px) {
       body {
         background:
           radial-gradient(
             circle at top,
-            rgba(21,169,229,.18),
+            rgba(21, 169, 229, .18),
             transparent 25%
           ),
           linear-gradient(
@@ -542,7 +990,9 @@
       }
 
       .page {
-        width: calc(100% - 18px);
+        width:
+          calc(100% - 18px);
+
         padding-top: 12px;
       }
 
@@ -556,14 +1006,18 @@
 
       .hero-logo {
         flex-basis: 86px;
+
         width: 86px;
         height: 86px;
+
         border-radius: 15px;
+
         padding: 8px;
       }
 
       .player-title {
         font-size: 33px;
+
         letter-spacing: -1px;
       }
 
@@ -572,7 +1026,8 @@
       }
 
       .stats {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns:
+          repeat(3, 1fr);
       }
 
       .stat {
@@ -588,17 +1043,21 @@
       }
 
       .balls-grid {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 9px;
+        grid-template-columns:
+          repeat(5, minmax(0, 1fr));
+
+        gap: 10px;
       }
 
-      .ball {
-        font-size: 14px;
+      .ball-number {
+        font-size: 15px;
       }
 
       .checkout-bar {
         padding: 14px;
+
         bottom: 8px;
+
         gap: 10px;
       }
 
@@ -612,11 +1071,13 @@
 
       .general-donation {
         display: block;
+
         text-align: center;
       }
 
       .general-button {
         width: 100%;
+
         margin-top: 14px;
       }
     }
@@ -628,6 +1089,7 @@
 
       .hero-logo {
         flex-basis: 72px;
+
         width: 72px;
         height: 72px;
       }
@@ -649,7 +1111,19 @@
       }
 
       .balls-grid {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns:
+          repeat(5, 1fr);
+
+        gap: 8px;
+      }
+
+      .ball-number {
+        font-size: 14px;
+      }
+
+      .stitch {
+        width: 6px;
+        height: 1.5px;
       }
     }
   </style>
@@ -665,12 +1139,17 @@
       </a>
     </div>
 
+    <!-- HERO -->
+
     <section class="hero">
 
       <div class="hero-inner">
 
         <div class="hero-logo">
-          <img src="/logo.png" alt="Boca Billygoats" />
+          <img
+            src="/logo.png"
+            alt="Boca Billygoats"
+          />
         </div>
 
         <div class="hero-copy">
@@ -680,7 +1159,10 @@
           </div>
 
           <h1 class="player-title">
-            <span id="playerName">Loading...</span>
+            <span id="playerName">
+              Loading...
+            </span>
+
             <span
               class="player-number"
               id="playerNumber"
@@ -701,41 +1183,52 @@
       <div class="stats">
 
         <div class="stat">
+
           <div class="stat-label">
             Amount Raised
           </div>
+
           <div
             class="stat-value"
             id="amountRaised"
           >
             $0
           </div>
+
         </div>
 
         <div class="stat">
+
           <div class="stat-label">
             Baseballs Sold
           </div>
+
           <div
             class="stat-value"
             id="ballsSold"
           >
             0
           </div>
+
         </div>
 
         <div class="stat">
+
           <div class="stat-label">
             Goal
           </div>
+
           <div class="stat-value">
             $5,050
           </div>
+
         </div>
 
       </div>
 
     </section>
+
+    <!-- FUNDRAISER -->
 
     <section class="fundraiser-card">
 
@@ -778,6 +1271,8 @@
         style="display:none"
       ></div>
 
+      <!-- CHECKOUT BAR -->
+
       <div
         class="checkout-bar"
         id="checkoutBar"
@@ -816,9 +1311,12 @@
 
       </div>
 
+      <!-- GENERAL DONATION -->
+
       <div class="general-donation">
 
         <div>
+
           <h3>
             Prefer a custom donation?
           </h3>
@@ -827,6 +1325,7 @@
             You can donate any amount directly
             to this player's Cooperstown fundraiser.
           </p>
+
         </div>
 
         <button
@@ -847,7 +1346,7 @@
 
   </div>
 
-  <!-- DONATION MODAL -->
+  <!-- CUSTOM DONATION MODAL -->
 
   <div
     class="modal-backdrop"
@@ -862,7 +1361,10 @@
 
       <p>
         Enter the amount you'd like to donate
-        to <span id="modalPlayerName">this player</span>.
+        to
+        <span id="modalPlayerName">
+          this player
+        </span>.
       </p>
 
       <label for="donationAmount">
@@ -910,55 +1412,72 @@
 
   <script>
 
+    /* ========================================
+       PLAYERS
+       ======================================== */
+
     const PLAYERS = {
+
       "joshua-masek": {
         name: "Joshua Masek",
         number: 1
       },
+
       "sebastian-mesa": {
         name: "Sebastian Mesa",
         number: 2
       },
+
       "zachary-harbaugh": {
         name: "Zachary Harbaugh",
         number: 3
       },
+
       "wyatt-munley": {
         name: "Wyatt Munley",
         number: 10
       },
+
       "lucas-feo": {
         name: "Lucas Feo",
         number: 12
       },
+
       "charles-schlacher": {
         name: "Charles Schlacher",
         number: 16
       },
+
       "austin-umstattd": {
         name: "Austin Umstattd",
         number: 17
       },
+
       "dylan-spellman": {
         name: "Dylan Spellman",
         number: 20
       },
+
       "alex-naylor": {
         name: "Alex Naylor",
         number: 27
       },
+
       "william-marchionne": {
         name: "William Marchionne",
         number: 28
       },
+
       "dominic-demarco": {
         name: "Dominic DeMarco",
         number: 37
       },
+
       "thomas-roberts": {
         name: "Thomas Roberts",
         number: 99
       }
+
     };
 
     const params =
@@ -977,6 +1496,10 @@
 
     let selectedBalls =
       new Set();
+
+    /* ========================================
+       INITIALIZE PLAYER
+       ======================================== */
 
     if (!player) {
 
@@ -1030,13 +1553,19 @@
 
     }
 
+    /* ========================================
+       LOAD FUNDRAISER
+       ======================================== */
+
     async function loadFundraiser() {
 
       try {
 
         const response =
           await fetch(
-            `/api/fundraiser?player=${encodeURIComponent(playerKey)}`,
+            `/api/fundraiser?player=${encodeURIComponent(
+              playerKey
+            )}`,
             {
               cache: "no-store"
             }
@@ -1046,10 +1575,12 @@
           await response.json();
 
         if (!response.ok) {
+
           throw new Error(
             data.error ||
             "Unable to load fundraiser."
           );
+
         }
 
         /*
@@ -1084,7 +1615,9 @@
           soldBalls =
             new Set(
               data.baseballs
-                .filter(ball => ball.sold)
+                .filter(ball =>
+                  ball.sold
+                )
                 .map(ball =>
                   Number(
                     ball.number ??
@@ -1154,6 +1687,10 @@
 
     }
 
+    /* ========================================
+       RENDER BASEBALLS
+       ======================================== */
+
     function renderBalls() {
 
       const grid =
@@ -1184,12 +1721,50 @@
             "
             data-ball="${number}"
             ${sold ? "disabled" : ""}
-            aria-label="
-              Baseball ${number}
-              ${sold ? "sold" : "available"}
-            "
+            aria-label="Baseball ${number} ${
+              sold
+                ? "sold"
+                : selected
+                  ? "selected"
+                  : "available"
+            }"
           >
-            ${number}
+
+            <span
+              class="ball-seam left"
+              aria-hidden="true"
+            ></span>
+
+            <span
+              class="ball-seam right"
+              aria-hidden="true"
+            ></span>
+
+            <span
+              class="stitches"
+              aria-hidden="true"
+            >
+
+              <span class="stitch l1"></span>
+              <span class="stitch l2"></span>
+              <span class="stitch l3"></span>
+              <span class="stitch l4"></span>
+              <span class="stitch l5"></span>
+              <span class="stitch l6"></span>
+
+              <span class="stitch r1"></span>
+              <span class="stitch r2"></span>
+              <span class="stitch r3"></span>
+              <span class="stitch r4"></span>
+              <span class="stitch r5"></span>
+              <span class="stitch r6"></span>
+
+            </span>
+
+            <span class="ball-number">
+              ${number}
+            </span>
+
           </button>
         `;
 
@@ -1220,6 +1795,10 @@
 
     }
 
+    /* ========================================
+       SELECT BASEBALL
+       ======================================== */
+
     function toggleBall(number) {
 
       if (
@@ -1245,16 +1824,22 @@
       }
 
       renderBalls();
+
       updateCheckout();
 
     }
+
+    /* ========================================
+       UPDATE CHECKOUT BAR
+       ======================================== */
 
     function updateCheckout() {
 
       const selected =
         [...selectedBalls]
           .sort(
-            (a,b) => a-b
+            (a, b) =>
+              a - b
           );
 
       const total =
@@ -1283,6 +1868,10 @@
 
     }
 
+    /* ========================================
+       STRIPE CHECKOUT
+       ======================================== */
+
     document.getElementById(
       "checkoutButton"
     ).addEventListener(
@@ -1303,7 +1892,9 @@
           "checkoutButton"
         );
 
-      button.disabled = true;
+      button.disabled =
+        true;
+
       button.textContent =
         "Loading...";
 
@@ -1312,7 +1903,8 @@
         const balls =
           [...selectedBalls]
             .sort(
-              (a,b) => a-b
+              (a, b) =>
+                a - b
             );
 
         const response =
@@ -1320,19 +1912,27 @@
             "/api/create-checkout",
             {
               method: "POST",
+
               headers: {
                 "content-type":
                   "application/json"
               },
-              body: JSON.stringify({
-                player: playerKey,
-                playerKey,
-                playerName:
-                  player.name,
-                playerNumber:
-                  player.number,
-                balls
-              })
+
+              body:
+                JSON.stringify({
+                  player:
+                    playerKey,
+
+                  playerKey,
+
+                  playerName:
+                    player.name,
+
+                  playerNumber:
+                    player.number,
+
+                  balls
+                })
             }
           );
 
@@ -1363,7 +1963,9 @@
           "Unable to start checkout."
         );
 
-        button.disabled = false;
+        button.disabled =
+          false;
+
         button.textContent =
           "Checkout";
 
@@ -1371,7 +1973,9 @@
 
     }
 
-    /* CUSTOM DONATION */
+    /* ========================================
+       CUSTOM DONATION
+       ======================================== */
 
     function openDonationModal() {
 
@@ -1403,7 +2007,8 @@
 
       document.getElementById(
         "modalError"
-      ).textContent = "";
+      ).textContent =
+        "";
 
     }
 
@@ -1426,7 +2031,8 @@
           "customDonateButton"
         );
 
-      error.textContent = "";
+      error.textContent =
+        "";
 
       if (
         !Number.isFinite(amount) ||
@@ -1439,7 +2045,9 @@
         return;
       }
 
-      button.disabled = true;
+      button.disabled =
+        true;
+
       button.textContent =
         "Loading...";
 
@@ -1449,20 +2057,29 @@
           await fetch(
             "/api/create-general-donation",
             {
-              method: "POST",
+              method:
+                "POST",
+
               headers: {
                 "content-type":
                   "application/json"
               },
-              body: JSON.stringify({
-                amount,
-                player: playerKey,
-                playerKey,
-                playerName:
-                  player.name,
-                playerNumber:
-                  player.number
-              })
+
+              body:
+                JSON.stringify({
+                  amount,
+
+                  player:
+                    playerKey,
+
+                  playerKey,
+
+                  playerName:
+                    player.name,
+
+                  playerNumber:
+                    player.number
+                })
             }
           );
 
@@ -1492,13 +2109,19 @@
           err.message ||
           "Unable to start checkout.";
 
-        button.disabled = false;
+        button.disabled =
+          false;
+
         button.textContent =
           "Continue";
 
       }
 
     }
+
+    /* ========================================
+       CLOSE MODAL ON BACKDROP CLICK
+       ======================================== */
 
     document.getElementById(
       "donationModal"
@@ -1510,7 +2133,9 @@
           event.target.id ===
           "donationModal"
         ) {
+
           closeDonationModal();
+
         }
 
       }
