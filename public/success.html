@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Thank You | Boca Billygoats 12U White
+  </title>
+
+  <style>
+    :root {
+      --navy: #071a36;
+      --blue: #15a9e5;
+      --white: #ffffff;
+      --light: #eef8fc;
+      --text: #0b1f33;
+      --muted: #5f6f7d;
+      --shadow:
+        0 18px 50px rgba(7, 26, 54, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at top,
+          rgba(21, 169, 229, 0.22),
+          transparent 36%
+        ),
+        linear-gradient(
+          180deg,
+          #071a36 0%,
+          #0b2a4f 48%,
+          #eef8fc 48%,
+          #eef8fc 100%
+        );
+
+      color: var(--text);
+    }
+
+    .page {
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding:
+        28px 18px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 640px;
+
+      background: var(--white);
+
+      border-radius: 28px;
+
+      overflow: hidden;
+
+      box-shadow:
+        var(--shadow);
+    }
+
+    .top {
+      background:
+        linear-gradient(
+          135deg,
+          #071a36,
+          #0b3766
+        );
+
+      color:
+        var(--white);
+
+      text-align:
+        center;
+
+      padding:
+        34px 24px 30px;
+    }
+
+    .logo {
+      width: 120px;
+      max-width: 36vw;
+
+      display: block;
+
+      margin:
+        0 auto 18px;
+
+      filter:
+        drop-shadow(
+          0 8px 18px rgba(0, 0, 0, 0.2)
+        );
+    }
+
+    .check {
+      width: 74px;
+      height: 74px;
+
+      border-radius: 50%;
+
+      margin:
+        0 auto 18px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        var(--blue);
+
+      border:
+        5px solid rgba(255, 255, 255, 0.3);
+
+      font-size: 38px;
+      font-weight: 900;
+
+      color:
+        white;
+    }
+
+    h1 {
+      margin:
+        0 0 10px;
+
+      font-size:
+        clamp(
+          30px,
+          7vw,
+          46px
+        );
+
+      line-height:
+        1;
+
+      letter-spacing:
+        -1px;
+    }
+
+    .subtitle {
+      margin: 0;
+
+      font-size: 17px;
+
+      color:
+        rgba(255, 255, 255, 0.85);
+
+      line-height:
+        1.5;
+    }
+
+    .content {
+      padding:
+        28px 24px 32px;
+
+      text-align:
+        center;
+    }
+
+    .message {
+      max-width: 500px;
+
+      margin:
+        0 auto 22px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        17px;
+
+      line-height:
+        1.6;
+    }
+
+    .player-box {
+      display: none;
+
+      background:
+        var(--light);
+
+      border:
+        1px solid rgba(21, 169, 229, 0.3);
+
+      border-radius:
+        18px;
+
+      padding:
+        18px;
+
+      margin:
+        0 auto 22px;
+
+      max-width:
+        470px;
+    }
+
+    .player-label {
+      color:
+        var(--muted);
+
+      font-size:
+        12px;
+
+      font-weight:
+        800;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        1px;
+
+      margin-bottom:
+        7px;
+    }
+
+    .player-name {
+      color:
+        var(--navy);
+
+      font-size:
+        23px;
+
+      font-weight:
+        900;
+    }
+
+    .amount {
+      margin-top:
+        7px;
+
+      color:
+        var(--blue);
+
+      font-size:
+        20px;
+
+      font-weight:
+        900;
+    }
+
+    .buttons {
+      display:
+        grid;
+
+      gap:
+        12px;
+
+      max-width:
+        470px;
+
+      margin:
+        0 auto;
+    }
+
+    .btn {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      min-height:
+        54px;
+
+      padding:
+        14px 20px;
+
+      border-radius:
+        15px;
+
+      text-decoration:
+        none;
+
+      font-weight:
+        900;
+
+      font-size:
+        16px;
+
+      cursor:
+        pointer;
+
+      border:
+        none;
+
+      transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+    .btn:active {
+      transform:
+        scale(0.98);
+    }
+
+    .primary {
+      background:
+        var(--blue);
+
+      color:
+        var(--white);
+    }
+
+    .secondary {
+      background:
+        var(--navy);
+
+      color:
+        var(--white);
+    }
+
+    .player-button {
+      display: none;
+    }
+
+    .footer {
+      padding:
+        0 20px 25px;
+
+      text-align:
+        center;
+
+      color:
+        #81909d;
+
+      font-size:
+        12px;
+    }
+
+    .loading {
+      font-size:
+        14px;
+
+      color:
+        var(--muted);
+
+      margin-top:
+        14px;
+    }
+
+    @media (
+      max-width: 520px
+    ) {
+      .card {
+        border-radius:
+          22px;
+      }
+
+      .top {
+        padding:
+          28px 18px 26px;
+      }
+
+      .content {
+        padding:
+          24px 18px 28px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <section class="card">
+
+      <div class="top">
+
+        <img
+          src="/logo.png"
+          alt="Boca Billygoats"
+          class="logo"
+        />
+
+        <div class="check">
+          ✓
+        </div>
+
+        <h1>
+          Thank You!
+        </h1>
+
+        <p class="subtitle">
+          Your support helps the
+          Boca Billygoats 12U White
+          on their Road to Cooperstown.
+        </p>
+
+      </div>
+
+      <div class="content">
+
+        <p class="message">
+          Your payment was received successfully.
+          Thank you for supporting our players,
+          families, and Cooperstown journey.
+        </p>
+
+        <div
+          class="player-box"
+          id="playerBox"
+        >
+
+          <div class="player-label">
+            You Supported
+          </div>
+
+          <div
+            class="player-name"
+            id="playerName"
+          ></div>
+
+          <div
+            class="amount"
+            id="donationAmount"
+          ></div>
+
+        </div>
+
+        <div class="buttons">
+
+          <a
+            href="/"
+            class="btn primary"
+          >
+            Back to Team
+          </a>
+
+          <a
+            href="/"
+            id="playerButton"
+            class="btn secondary player-button"
+          >
+            Back to Player Fundraiser
+          </a>
+
+        </div>
+
+        <div
+          class="loading"
+          id="loading"
+        >
+          Payment confirmed.
+        </div>
+
+      </div>
+
+      <div class="footer">
+        Boca Billygoats 12U White
+        • Road to Cooperstown
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const sessionId =
+      params.get("session_id");
+
+    /*
+     * The success page works even without
+     * looking up the Stripe session.
+     *
+     * For now we simply confirm the successful
+     * return from Stripe.
+     *
+     * If player info is passed in the URL later,
+     * this page can show it automatically.
+     */
+
+    const player =
+      params.get("player");
+
+    const playerName =
+      params.get("playerName");
+
+    const amount =
+      params.get("amount");
+
+    if (player) {
+      const button =
+        document.getElementById(
+          "playerButton"
+        );
+
+      button.href =
+        `/fundraiser.html?player=${encodeURIComponent(
+          player
+        )}`;
+
+      button.style.display =
+        "flex";
+    }
+
+    if (
+      playerName ||
+      amount
+    ) {
+      const box =
+        document.getElementById(
+          "playerBox"
+        );
+
+      box.style.display =
+        "block";
+
+      if (playerName) {
+        document.getElementById(
+          "playerName"
+        ).textContent =
+          playerName;
+      }
+
+      if (amount) {
+        const number =
+          Number(amount);
+
+        if (
+          Number.isFinite(number)
+        ) {
+          document.getElementById(
+            "donationAmount"
+          ).textContent =
+            `$${number.toFixed(2)} Donation`;
+        }
+      }
+    }
+
+    if (!sessionId) {
+      document.getElementById(
+        "loading"
+      ).textContent =
+        "Thank you for supporting the Boca Billygoats!";
+    }
+  </script>
+
+</body>
+</html>
